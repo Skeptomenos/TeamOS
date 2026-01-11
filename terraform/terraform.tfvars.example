@@ -1,0 +1,6 @@
+project_id       = "it-services-automations"
+region           = "europe-west1"
+zone             = "europe-west1-b"
+machine_type     = "e2-standard-4"
+data_disk_size   = 200
+team_group_email = "identity-n-productivity@example.com"
