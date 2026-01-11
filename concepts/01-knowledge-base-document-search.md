@@ -1,43 +1,45 @@
-# Konzeptpapier: Knowledge Base - Dokumentenverwaltung und Suche
+# Concept Paper: Knowledge Base - Document Management and Search
 
-**Version:** 1.0  
-**Datum:** 2025-01-10  
-**Status:** Entwurf  
-**Autor:** IT Architecture Team
+**Version:** 1.1  
+**Date:** 2025-01-11  
+**Status:** Implemented  
+**Author:** TeamOS
 
 ---
 
 ## 1. Executive Summary
 
-Dieses Dokument beschreibt das Konzept für eine team-weite Knowledge Base, die auf Markdown-Dateien basiert und durch moderne Suchtechnologien für LLM-basierte CLI-Tools (OpenCode, Gemini CLI) optimiert ist. Das Ziel ist eine zentrale, durchsuchbare Wissensdatenbank, die sowohl von Menschen als auch von AI-Agenten effizient genutzt werden kann.
+This document describes the concept for a team-wide Knowledge Base built on Markdown files and optimized through modern search technologies for LLM-based CLI tools (OpenCode, Gemini CLI). The goal is a central, searchable knowledge database that can be efficiently used by both humans and AI agents.
+
+> **Future Enhancement:** For improved semantic search and token efficiency, see [[08-hybrid-search-vector-database]] which adds vector-based search alongside the keyword search described here.
 
 ---
 
-## 2. Problemstellung
+## 2. Problem Statement
 
-### 2.1 Aktuelle Herausforderungen
+### 2.1 Current Challenges
 
-| Problem | Auswirkung |
-|---------|------------|
-| Wissen in Silos (Confluence, lokale Notizen, Slack) | Informationen schwer auffindbar |
-| Keine einheitliche Struktur | Inkonsistente Dokumentation |
-| Keine AI-Optimierung | LLMs können Wissen nicht effizient nutzen |
-| Fehlende Versionierung | Änderungen nicht nachvollziehbar |
-| Keine Metadaten | Autor, Erstelldatum, Kontext fehlen |
+| Problem | Impact |
+|---------|--------|
+| Knowledge in silos (Confluence, local notes, Slack) | Information hard to find |
+| No unified structure | Inconsistent documentation |
+| No AI optimization | LLMs cannot efficiently use knowledge |
+| Missing version control | Changes not traceable |
+| No metadata | Author, creation date, context missing |
 
-### 2.2 Anforderungen
+### 2.2 Requirements
 
-- **Unified Search**: Eine Suche für alle Dokumente
-- **AI-Ready**: Optimiert für LLM-Kontext-Fenster
-- **Versioniert**: Vollständige Änderungshistorie
-- **Metadaten-reich**: Frontmatter mit Autor, Datum, Tags
-- **Schnell**: Sub-Sekunden Suche bei 10.000+ Dokumenten
+- **Unified Search**: One search for all documents
+- **AI-Ready**: Optimized for LLM context windows
+- **Versioned**: Complete change history
+- **Metadata-rich**: Frontmatter with author, date, tags
+- **Fast**: Sub-second search for 10,000+ documents
 
 ---
 
-## 3. Lösungsarchitektur
+## 3. Solution Architecture
 
-### 3.1 Technologie-Stack
+### 3.1 Technology Stack
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -45,18 +47,18 @@ Dieses Dokument beschreibt das Konzept für eine team-weite Knowledge Base, die 
 │                                                                 │
 │  ┌─────────────────────────────────────────────────────────┐   │
 │  │                   Markdown Files                         │   │
-│  │   - Frontmatter (YAML) für Metadaten                    │   │
-│  │   - Standardisierte Ordnerstruktur                      │   │
-│  │   - Git-versioniert                                     │   │
+│  │   - Frontmatter (YAML) for metadata                     │   │
+│  │   - Standardized folder structure                       │   │
+│  │   - Git-versioned                                       │   │
 │  └─────────────────────────────────────────────────────────┘   │
 │                            │                                    │
 │                            ▼                                    │
 │  ┌─────────────────────────────────────────────────────────┐   │
 │  │                   MeiliSearch                            │   │
-│  │   - Volltextsuche mit Typo-Toleranz                     │   │
-│  │   - Faceted Search (nach Tags, Autor, Datum)            │   │
-│  │   - REST API für CLI-Integration                        │   │
-│  │   - ~500MB RAM für 10k Dokumente                        │   │
+│  │   - Full-text search with typo tolerance                │   │
+│  │   - Faceted search (by tags, author, date)              │   │
+│  │   - REST API for CLI integration                        │   │
+│  │   - ~500MB RAM for 10k documents                        │   │
 │  └─────────────────────────────────────────────────────────┘   │
 │                            │                                    │
 │                            ▼                                    │
@@ -64,67 +66,67 @@ Dieses Dokument beschreibt das Konzept für eine team-weite Knowledge Base, die 
 │  │                   CLI Interface                          │   │
 │  │   - `kb search "API documentation"`                     │   │
 │  │   - `kb add runbooks/new-runbook.md`                    │   │
-│  │   - Integration in OpenCode/Gemini CLI                  │   │
+│  │   - Integration with OpenCode/Gemini CLI                │   │
 │  └─────────────────────────────────────────────────────────┘   │
 │                                                                 │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-### 3.2 Warum MeiliSearch?
+### 3.2 Why MeiliSearch?
 
-| Kriterium | MeiliSearch | Typesense | Elasticsearch |
+| Criterion | MeiliSearch | Typesense | Elasticsearch |
 |-----------|-------------|-----------|---------------|
-| **RAM-Verbrauch** | ~500MB | ~300MB | 2GB+ |
-| **Setup-Komplexität** | Einfach | Mittel | Komplex |
-| **Typo-Toleranz** | Exzellent | Gut | Konfigurierbar |
-| **Latenz** | <50ms | <50ms | <100ms |
+| **RAM Usage** | ~500MB | ~300MB | 2GB+ |
+| **Setup Complexity** | Simple | Medium | Complex |
+| **Typo Tolerance** | Excellent | Good | Configurable |
+| **Latency** | <50ms | <50ms | <100ms |
 | **Docker Image** | 50MB | 30MB | 500MB+ |
-| **Ops-Overhead** | Minimal | Minimal | Hoch |
+| **Ops Overhead** | Minimal | Minimal | High |
 
-**Entscheidung**: MeiliSearch bietet das beste Verhältnis aus Einfachheit, Performance und Features für unseren Use Case.
+**Decision**: MeiliSearch offers the best balance of simplicity, performance, and features for our use case.
 
 ---
 
-## 4. Dokumentenstruktur
+## 4. Document Structure
 
-### 4.1 Ordnerstruktur
+### 4.1 Folder Structure
 
 ```
-/shared/knowledge/
-├── api-docs/                 # API-Dokumentation
+/data/shared/knowledge/
+├── api-docs/                 # API documentation
 │   ├── entra-id/
 │   ├── google-workspace/
 │   ├── atlassian/
 │   └── slack/
-├── runbooks/                 # Operative Runbooks
+├── runbooks/                 # Operational runbooks
 │   ├── incident-response/
 │   ├── onboarding/
 │   └── maintenance/
 ├── decisions/                # Architecture Decision Records (ADRs)
 │   ├── 001-knowledge-base-stack.md
 │   └── 002-search-engine-choice.md
-├── guides/                   # How-To Guides
+├── guides/                   # How-to guides
 │   ├── developer/
 │   └── admin/
-├── meeting-notes/            # Meeting-Protokolle
+├── meeting-notes/            # Meeting notes
 │   └── 2025/
-└── templates/                # Dokumentvorlagen
+└── templates/                # Document templates
     ├── runbook-template.md
     ├── adr-template.md
     └── meeting-template.md
 ```
 
-### 4.2 Frontmatter-Schema
+### 4.2 Frontmatter Schema
 
-Jedes Markdown-Dokument MUSS folgendes Frontmatter enthalten:
+Every Markdown document MUST contain the following frontmatter:
 
 ```yaml
 ---
-title: "API-Dokumentation: Entra ID Graph API"
+title: "API Documentation: Entra ID Graph API"
 created: 2025-01-10
-created_by: admin@company.com
+created_by: admin@example.com
 updated: 2025-01-10
-updated_by: admin@company.com
+updated_by: admin@example.com
 tags:
   - api
   - entra-id
@@ -134,30 +136,30 @@ status: published  # draft | review | published | deprecated
 ---
 ```
 
-### 4.3 Automatische Frontmatter-Validierung
+### 4.3 Automatic Frontmatter Validation
 
-Pre-commit Hook zur Validierung:
+Pre-commit hook for validation:
 
 ```bash
 #!/bin/bash
 # .git/hooks/pre-commit
 
 for file in $(git diff --cached --name-only --diff-filter=ACM | grep '\.md$'); do
-    # Prüfe ob Frontmatter existiert
+    # Check if frontmatter exists
     if ! head -1 "$file" | grep -q '^---$'; then
-        echo "ERROR: $file hat kein Frontmatter"
+        echo "ERROR: $file has no frontmatter"
         exit 1
     fi
     
-    # Prüfe Pflichtfelder
+    # Check required fields
     for field in title created created_by; do
         if ! grep -q "^$field:" "$file"; then
-            echo "ERROR: $file fehlt Pflichtfeld '$field'"
+            echo "ERROR: $file missing required field '$field'"
             exit 1
         fi
     done
     
-    # Update 'updated' und 'updated_by' automatisch
+    # Auto-update 'updated' and 'updated_by'
     sed -i '' "s/^updated:.*/updated: $(date +%Y-%m-%d)/" "$file"
     sed -i '' "s/^updated_by:.*/updated_by: $GIT_AUTHOR_EMAIL/" "$file"
     git add "$file"
@@ -166,9 +168,9 @@ done
 
 ---
 
-## 5. Suchsystem
+## 5. Search System
 
-### 5.1 MeiliSearch Konfiguration
+### 5.1 MeiliSearch Configuration
 
 ```yaml
 # docker-compose.yml
@@ -193,7 +195,7 @@ services:
       retries: 3
 ```
 
-### 5.2 Index-Schema
+### 5.2 Index Schema
 
 ```json
 {
@@ -228,13 +230,13 @@ services:
 }
 ```
 
-### 5.3 Indexer-Script
+### 5.3 Indexer Script
 
 ```python
 #!/usr/bin/env python3
 """
 Knowledge Base Indexer
-Indexiert alle Markdown-Dateien in MeiliSearch
+Indexes all Markdown files into MeiliSearch
 """
 
 import meilisearch
@@ -246,19 +248,19 @@ from datetime import datetime
 
 MEILI_URL = os.getenv('MEILI_URL', 'http://localhost:7700')
 MEILI_KEY = os.getenv('MEILI_MASTER_KEY')
-KNOWLEDGE_DIR = os.getenv('KNOWLEDGE_DIR', '/shared/knowledge')
+KNOWLEDGE_DIR = os.getenv('KNOWLEDGE_DIR', '/data/shared/knowledge')
 
 client = meilisearch.Client(MEILI_URL, MEILI_KEY)
 
 def get_or_create_index():
-    """Index erstellen falls nicht vorhanden"""
+    """Create index if it doesn't exist"""
     try:
         return client.get_index('knowledge')
     except:
         client.create_index('knowledge', {'primaryKey': 'id'})
         index = client.get_index('knowledge')
         
-        # Konfiguration setzen
+        # Set configuration
         index.update_searchable_attributes([
             'title', 'content', 'tags', 'category'
         ])
@@ -272,10 +274,10 @@ def get_or_create_index():
         return index
 
 def index_file(filepath: Path) -> dict:
-    """Einzelne Datei indexieren"""
+    """Index a single file"""
     post = frontmatter.load(filepath)
     
-    # ID aus Dateipfad generieren
+    # Generate ID from file path
     relative_path = filepath.relative_to(KNOWLEDGE_DIR)
     doc_id = hashlib.md5(str(relative_path).encode()).hexdigest()
     
@@ -295,7 +297,7 @@ def index_file(filepath: Path) -> dict:
     }
 
 def full_reindex():
-    """Vollständige Neuindexierung"""
+    """Complete reindexing"""
     index = get_or_create_index()
     
     docs = []
@@ -310,7 +312,7 @@ def full_reindex():
         print(f"Indexed {len(docs)} documents")
 
 def incremental_index(filepath: str):
-    """Einzelne Datei (neu-)indexieren"""
+    """Index a single file (new or updated)"""
     index = get_or_create_index()
     doc = index_file(Path(filepath))
     index.add_documents([doc])
@@ -325,7 +327,7 @@ if __name__ == '__main__':
         full_reindex()
 ```
 
-### 5.4 File-Watcher für Real-Time Indexing
+### 5.4 File Watcher for Real-Time Indexing
 
 ```python
 #!/usr/bin/env python3
@@ -349,7 +351,7 @@ class MarkdownHandler(FileSystemEventHandler):
 
 if __name__ == '__main__':
     observer = Observer()
-    observer.schedule(MarkdownHandler(), '/shared/knowledge', recursive=True)
+    observer.schedule(MarkdownHandler(), '/data/shared/knowledge', recursive=True)
     observer.start()
     
     try:
@@ -362,7 +364,7 @@ if __name__ == '__main__':
 
 ---
 
-## 6. CLI-Integration
+## 6. CLI Integration
 
 ### 6.1 Knowledge Base CLI Tool
 
@@ -385,18 +387,18 @@ case "$1" in
         ;;
     
     read)
-        # Datei anzeigen
-        cat "/shared/knowledge/$2"
+        # Display file
+        cat "/data/shared/knowledge/$2"
         ;;
     
     list)
-        # Dateien in Kategorie auflisten
-        find "/shared/knowledge/$2" -name "*.md" -type f | head -20
+        # List files in category
+        find "/data/shared/knowledge/$2" -name "*.md" -type f | head -20
         ;;
     
     recent)
-        # Kürzlich geänderte Dateien
-        find /shared/knowledge -name "*.md" -mtime -7 -type f | head -20
+        # Recently modified files
+        find /data/shared/knowledge -name "*.md" -mtime -7 -type f | head -20
         ;;
     
     *)
@@ -415,7 +417,7 @@ esac
 ```markdown
 ## Knowledge Base Access
 
-The team knowledge base is available at `/shared/knowledge/`.
+The team knowledge base is available at `/data/shared/knowledge/`.
 
 ### Search Commands
 - `kb search "query"` - Full-text search across all documents
@@ -436,16 +438,16 @@ All documents use frontmatter with: title, created, created_by, tags, category, 
 
 ---
 
-## 7. LLM-Optimierung
+## 7. LLM Optimization
 
-### 7.1 Kontext-Fenster-Optimierung
+### 7.1 Context Window Optimization
 
-Für LLMs ist es wichtig, relevante Dokumente kompakt zu liefern:
+For LLMs, it's important to deliver relevant documents compactly:
 
 ```python
 def get_context_for_llm(query: str, max_tokens: int = 4000) -> str:
     """
-    Holt relevante Dokumente und formatiert sie für LLM-Kontext
+    Retrieves relevant documents and formats them for LLM context
     """
     results = search(query, limit=10)
     
@@ -453,7 +455,7 @@ def get_context_for_llm(query: str, max_tokens: int = 4000) -> str:
     current_tokens = 0
     
     for hit in results['hits']:
-        # Geschätzte Token-Zahl (grob: 4 chars = 1 token)
+        # Estimated token count (rough: 4 chars = 1 token)
         doc_tokens = len(hit['content']) // 4
         
         if current_tokens + doc_tokens > max_tokens:
@@ -471,12 +473,12 @@ def get_context_for_llm(query: str, max_tokens: int = 4000) -> str:
     return "\n---\n".join(context_parts)
 ```
 
-### 7.2 Semantic Search (Optional, Phase 2)
+### 7.2 Semantic Search (Enhancement)
 
-Für bessere Suchergebnisse kann später Embedding-basierte Suche hinzugefügt werden:
+For better search results, embedding-based search can be added. See [[08-hybrid-search-vector-database]] for the complete design of hybrid keyword + vector search.
 
 ```python
-# Mit sentence-transformers
+# With sentence-transformers
 from sentence_transformers import SentenceTransformer
 
 model = SentenceTransformer('all-MiniLM-L6-v2')
@@ -484,54 +486,54 @@ model = SentenceTransformer('all-MiniLM-L6-v2')
 def embed_document(content: str) -> list:
     return model.encode(content).tolist()
 
-# Speicherung in pgvector oder Qdrant
+# Storage in Qdrant (see concept 08)
 ```
 
 ---
 
 ## 8. Backup & Recovery
 
-### 8.1 Backup-Strategie
+### 8.1 Backup Strategy
 
 ```bash
 #!/bin/bash
 # /etc/cron.daily/knowledge-backup
 
-# Git-basiertes Backup (bereits durch Git abgedeckt)
-cd /shared/knowledge
+# Git-based backup (already covered by Git)
+cd /data/shared/knowledge
 git push origin main
 
-# MeiliSearch Dump
+# MeiliSearch dump
 curl -X POST "http://localhost:7700/dumps" \
     -H "Authorization: Bearer ${MEILI_KEY}"
 
-# Dump nach GCS kopieren
+# Copy dump to GCS
 gsutil cp /meili_data/dumps/*.dump gs://company-backups/knowledge/
 ```
 
 ### 8.2 Recovery
 
 ```bash
-# Bei Datenverlust: Git restore
-cd /shared/knowledge
+# On data loss: Git restore
+cd /data/shared/knowledge
 git checkout main
 
-# MeiliSearch neu indexieren
+# Reindex MeiliSearch
 python3 indexer.py
 ```
 
 ---
 
-## 9. Metriken & Monitoring
+## 9. Metrics & Monitoring
 
-### 9.1 Zu überwachende Metriken
+### 9.1 Metrics to Monitor
 
-| Metrik | Schwellwert | Aktion |
-|--------|-------------|--------|
-| Suchlatenz | >200ms | Index optimieren |
-| Index-Größe | >5GB | Alte Dokumente archivieren |
-| Dokumente ohne Frontmatter | >0 | Pre-commit Hook prüfen |
-| Verwaiste Dokumente | >30 Tage unverändert | Review-Prozess |
+| Metric | Threshold | Action |
+|--------|-----------|--------|
+| Search latency | >200ms | Optimize index |
+| Index size | >5GB | Archive old documents |
+| Documents without frontmatter | >0 | Check pre-commit hook |
+| Orphaned documents | >30 days unchanged | Review process |
 
 ### 9.2 Health Check
 
@@ -539,13 +541,13 @@ python3 indexer.py
 #!/bin/bash
 # health-check.sh
 
-# MeiliSearch erreichbar?
+# MeiliSearch reachable?
 if ! curl -sf http://localhost:7700/health > /dev/null; then
     echo "CRITICAL: MeiliSearch not responding"
     exit 2
 fi
 
-# Index vorhanden?
+# Index exists?
 doc_count=$(curl -s http://localhost:7700/indexes/knowledge/stats \
     -H "Authorization: Bearer ${MEILI_KEY}" | jq '.numberOfDocuments')
 
@@ -560,29 +562,37 @@ exit 0
 
 ---
 
-## 10. Rollout-Plan
+## 10. Rollout Plan
 
-| Phase | Zeitraum | Aktivitäten |
-|-------|----------|-------------|
-| **Phase 1** | Woche 1 | MeiliSearch aufsetzen, Indexer implementieren |
-| **Phase 2** | Woche 2 | Bestehende Docs migrieren, Frontmatter hinzufügen |
-| **Phase 3** | Woche 3 | CLI-Tool deployen, Team-Schulung |
-| **Phase 4** | Woche 4 | Monitoring einrichten, Feedback sammeln |
-| **Phase 5** | Monat 2+ | Semantic Search evaluieren |
-
----
-
-## 11. Offene Fragen
-
-- [ ] Sollen alte Confluence-Seiten migriert werden?
-- [ ] Wie lange sollen deprecated Dokumente aufbewahrt werden?
-- [ ] Brauchen wir Zugriffsrechte pro Kategorie?
-- [ ] Integration mit Slack für Benachrichtigungen bei neuen Docs?
+| Phase | Timeframe | Activities |
+|-------|-----------|------------|
+| **Phase 1** | Week 1 | Set up MeiliSearch, implement indexer |
+| **Phase 2** | Week 2 | Migrate existing docs, add frontmatter |
+| **Phase 3** | Week 3 | Deploy CLI tool, team training |
+| **Phase 4** | Week 4 | Set up monitoring, collect feedback |
+| **Phase 5** | Month 2+ | Evaluate and implement semantic search (see [[08-hybrid-search-vector-database]]) |
 
 ---
 
-## Anhang A: Referenzen
+## 11. Open Questions
 
-- [MeiliSearch Dokumentation](https://docs.meilisearch.com/)
+- [ ] Should old Confluence pages be migrated?
+- [ ] How long should deprecated documents be retained?
+- [ ] Do we need access rights per category?
+- [ ] Integration with Slack for notifications on new docs?
+
+---
+
+## Related Documents
+
+- [[00-vision]] - TeamOS vision and strategic phases
+- [[05-overall-architecture]] - System architecture overview
+- [[08-hybrid-search-vector-database]] - Hybrid search with vector database (planned enhancement)
+
+---
+
+## Appendix A: References
+
+- [MeiliSearch Documentation](https://docs.meilisearch.com/)
 - [Python Frontmatter Library](https://python-frontmatter.readthedocs.io/)
 - [Watchdog File System Events](https://pythonhosted.org/watchdog/)

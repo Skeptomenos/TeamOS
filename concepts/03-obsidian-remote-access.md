@@ -1,53 +1,53 @@
-# Konzeptpapier: Obsidian & Remote Server Access
+# Concept Paper: Obsidian & Remote Server Access
 
-**Version:** 1.0  
-**Datum:** 2025-01-10  
-**Status:** Entwurf  
-**Autor:** IT Architecture Team
+**Version:** 1.1  
+**Date:** 2025-01-11  
+**Status:** Implemented  
+**Author:** TeamOS
 
 ---
 
 ## 1. Executive Summary
 
-Dieses Dokument beschreibt, wie Teammitglieder von ihren lokalen Computern auf den zentralen Knowledge-Server zugreifen können. Es werden verschiedene Methoden für den Zugang evaluiert, mit besonderem Fokus auf die Integration von Obsidian als GUI-basiertem Markdown-Editor neben den CLI-Tools (OpenCode, Gemini CLI).
+This document describes how team members can access the central knowledge server from their local computers. Various access methods are evaluated, with a special focus on integrating Obsidian as a GUI-based Markdown editor alongside CLI tools (OpenCode, Gemini CLI).
 
 ---
 
-## 2. Anforderungen
+## 2. Requirements
 
-### 2.1 Funktionale Anforderungen
+### 2.1 Functional Requirements
 
-| Anforderung | Beschreibung |
-|-------------|--------------|
-| CLI-Zugang | SSH-basierter Zugang für OpenCode/Gemini CLI |
-| GUI-Zugang | Obsidian für visuelles Navigieren und Bearbeiten |
-| Offline-Fähigkeit | Arbeiten auch ohne Netzwerkverbindung |
-| Synchronisation | Änderungen werden zwischen lokal und Server synchronisiert |
-| Multi-Device | Zugang von Laptop, Desktop, ggf. Tablet |
+| Requirement | Description |
+|-------------|-------------|
+| CLI Access | SSH-based access for OpenCode/Gemini CLI |
+| GUI Access | Obsidian for visual navigation and editing |
+| Offline Capability | Work even without network connection |
+| Synchronization | Changes are synchronized between local and server |
+| Multi-Device | Access from laptop, desktop, optionally tablet |
 
-### 2.2 Nicht-funktionale Anforderungen
+### 2.2 Non-Functional Requirements
 
-| Anforderung | Beschreibung |
-|-------------|--------------|
-| Latenz | <100ms für Dateioperationen |
-| Zuverlässigkeit | Keine Datenverluste bei Verbindungsabbruch |
-| Sicherheit | Verschlüsselte Übertragung, Authentifizierung |
-| Einfachheit | Minimaler Setup-Aufwand für neue Teammitglieder |
+| Requirement | Description |
+|-------------|-------------|
+| Latency | <100ms for file operations |
+| Reliability | No data loss on connection interruption |
+| Security | Encrypted transmission, authentication |
+| Simplicity | Minimal setup effort for new team members |
 
 ---
 
-## 3. Zugangsoptionen im Überblick
+## 3. Access Options Overview
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                    Zugangsoptionen                              │
+│                    Access Options                               │
 │                                                                 │
 │  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐ │
 │  │   Option A      │  │   Option B      │  │   Option C      │ │
 │  │   SSH + CLI     │  │   SSHFS Mount   │  │   Git Sync      │ │
 │  │                 │  │                 │  │                 │ │
 │  │  Terminal-only  │  │  Filesystem     │  │  Offline-first  │ │
-│  │  Server-side    │  │  Remote Mount   │  │  Bidirektional  │ │
+│  │  Server-side    │  │  Remote Mount   │  │  Bidirectional  │ │
 │  └─────────────────┘  └─────────────────┘  └─────────────────┘ │
 │                                                                 │
 │  ┌─────────────────┐  ┌─────────────────┐                      │
@@ -55,7 +55,7 @@ Dieses Dokument beschreibt, wie Teammitglieder von ihren lokalen Computern auf d
 │  │   Syncthing     │  │   Obsidian      │                      │
 │  │                 │  │   Livesync      │                      │
 │  │  P2P Sync       │  │  Real-time      │                      │
-│  │  Dezentral      │  │  CouchDB-based  │                      │
+│  │  Decentralized  │  │  CouchDB-based  │                      │
 │  └─────────────────┘  └─────────────────┘                      │
 │                                                                 │
 └─────────────────────────────────────────────────────────────────┘
@@ -63,57 +63,57 @@ Dieses Dokument beschreibt, wie Teammitglieder von ihren lokalen Computern auf d
 
 ---
 
-## 4. Option A: SSH + CLI (Basis)
+## 4. Option A: SSH + CLI (Baseline)
 
-### 4.1 Beschreibung
+### 4.1 Description
 
-Direkter SSH-Zugang zum Server. Alle Arbeit findet auf dem Server statt.
+Direct SSH access to the server. All work takes place on the server.
 
 ```
 ┌──────────────┐         SSH          ┌──────────────┐
 │   Laptop     │◄────────────────────►│   Server     │
 │              │                       │              │
 │  Terminal    │                       │  /shared/    │
-│  (lokal)     │                       │  knowledge/  │
+│  (local)     │                       │  knowledge/  │
 └──────────────┘                       └──────────────┘
 ```
 
 ### 4.2 Setup
 
 ```bash
-# ~/.ssh/config auf dem Laptop
+# ~/.ssh/config on the laptop
 Host team-server
     HostName team-server.company.internal
     User admin
     IdentityFile ~/.ssh/id_ed25519
     ForwardAgent yes
     
-# Verbinden
+# Connect
 ssh team-server
 
-# OpenCode auf dem Server nutzen
+# Use OpenCode on the server
 opencode
 ```
 
-### 4.3 Bewertung
+### 4.3 Evaluation
 
-| Kriterium | Bewertung | Kommentar |
-|-----------|-----------|-----------|
-| Setup-Aufwand | ⭐⭐⭐⭐⭐ | Minimal |
-| Offline-Fähigkeit | ⭐ | Keine |
-| Latenz | ⭐⭐⭐ | Abhängig von Netzwerk |
-| Obsidian-Integration | ⭐ | Nicht möglich |
-| Konflikt-Risiko | ⭐⭐⭐⭐⭐ | Keins (alles auf Server) |
+| Criterion | Rating | Comment |
+|-----------|--------|---------|
+| Setup Effort | ⭐⭐⭐⭐⭐ | Minimal |
+| Offline Capability | ⭐ | None |
+| Latency | ⭐⭐⭐ | Depends on network |
+| Obsidian Integration | ⭐ | Not possible |
+| Conflict Risk | ⭐⭐⭐⭐⭐ | None (everything on server) |
 
-**Empfehlung**: Basis-Zugang für CLI-Arbeit, aber nicht ausreichend für Obsidian.
+**Recommendation**: Baseline access for CLI work, but not sufficient for Obsidian.
 
 ---
 
 ## 5. Option B: SSHFS Mount
 
-### 5.1 Beschreibung
+### 5.1 Description
 
-Der Server-Ordner wird als lokales Dateisystem gemountet. Obsidian kann direkt darauf zugreifen.
+The server folder is mounted as a local filesystem. Obsidian can access it directly.
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
@@ -138,25 +138,25 @@ Der Server-Ordner wird als lokales Dateisystem gemountet. Obsidian kann direkt d
 ### 5.2 Setup (macOS)
 
 ```bash
-# macFUSE installieren (einmalig)
+# Install macFUSE (one-time)
 brew install --cask macfuse
 brew install gromgit/fuse/sshfs-mac
 
-# Mount-Punkt erstellen
+# Create mount point
 mkdir -p ~/knowledge
 
-# Mounten
+# Mount
 sshfs admin@team-server:/shared/knowledge ~/knowledge \
     -o reconnect \
     -o ServerAliveInterval=15 \
     -o ServerAliveCountMax=3 \
     -o volname=TeamKnowledge
 
-# Unmounten
+# Unmount
 umount ~/knowledge
 ```
 
-### 5.3 Automatisches Mounten (macOS)
+### 5.3 Automatic Mounting (macOS)
 
 ```bash
 # ~/Library/LaunchAgents/com.company.sshfs-knowledge.plist
@@ -182,25 +182,25 @@ umount ~/knowledge
 </plist>
 ```
 
-### 5.4 Bewertung
+### 5.4 Evaluation
 
-| Kriterium | Bewertung | Kommentar |
-|-----------|-----------|-----------|
-| Setup-Aufwand | ⭐⭐⭐ | macFUSE Installation nötig |
-| Offline-Fähigkeit | ⭐ | Keine |
-| Latenz | ⭐⭐ | Spürbar bei großen Vaults |
-| Obsidian-Integration | ⭐⭐⭐⭐ | Funktioniert, aber langsam |
-| Konflikt-Risiko | ⭐⭐ | Last-Write-Wins |
+| Criterion | Rating | Comment |
+|-----------|--------|---------|
+| Setup Effort | ⭐⭐⭐ | macFUSE installation required |
+| Offline Capability | ⭐ | None |
+| Latency | ⭐⭐ | Noticeable with large vaults |
+| Obsidian Integration | ⭐⭐⭐⭐ | Works, but slow |
+| Conflict Risk | ⭐⭐ | Last-Write-Wins |
 
-**Empfehlung**: Funktioniert, aber Latenz kann bei großen Vaults störend sein.
+**Recommendation**: Works, but latency can be disruptive with large vaults.
 
 ---
 
-## 6. Option C: Git Sync (Empfohlen)
+## 6. Option C: Git Sync (Recommended)
 
-### 6.1 Beschreibung
+### 6.1 Description
 
-Lokale Kopie des Vaults, synchronisiert via Git. Obsidian Git Plugin für automatische Sync.
+Local copy of the vault, synchronized via Git. Obsidian Git Plugin for automatic sync.
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
@@ -208,7 +208,7 @@ Lokale Kopie des Vaults, synchronisiert via Git. Obsidian Git Plugin für automa
 │                                                               │
 │  ┌─────────────────┐                ┌─────────────────┐      │
 │  │    Obsidian     │◄──────────────►│  ~/knowledge/   │      │
-│  │  + Git Plugin   │                │  (lokale Kopie) │      │
+│  │  + Git Plugin   │                │  (local copy)   │      │
 │  └─────────────────┘                └────────┬────────┘      │
 │                                              │               │
 └──────────────────────────────────────────────┼───────────────┘
@@ -232,10 +232,10 @@ Lokale Kopie des Vaults, synchronisiert via Git. Obsidian Git Plugin für automa
 
 ### 6.2 Setup
 
-#### Server-Seite
+#### Server-Side
 
 ```bash
-# Auf dem Server
+# On the server
 cd /shared/knowledge
 git init
 git remote add origin git@github.com:company/knowledge-base.git
@@ -243,53 +243,53 @@ git add -A
 git commit -m "Initial commit"
 git push -u origin main
 
-# Auto-Pull via Cron (alle 5 Minuten)
+# Auto-Pull via Cron (every 5 minutes)
 echo "*/5 * * * * cd /shared/knowledge && git pull --rebase" | crontab -
 ```
 
-#### Client-Seite (Laptop)
+#### Client-Side (Laptop)
 
 ```bash
-# Repository klonen
+# Clone repository
 git clone git@github.com:company/knowledge-base.git ~/knowledge
 
-# Obsidian öffnen mit diesem Vault
+# Open Obsidian with this vault
 open -a Obsidian ~/knowledge
 ```
 
 #### Obsidian Git Plugin
 
-1. Community Plugins aktivieren
-2. "Obsidian Git" Plugin installieren
-3. Konfiguration:
+1. Enable Community Plugins
+2. Install "Obsidian Git" Plugin
+3. Configuration:
 
 ```
-Vault backup interval: 5 (Minuten)
-Auto pull interval: 5 (Minuten)
+Vault backup interval: 5 (minutes)
+Auto pull interval: 5 (minutes)
 Commit message: {{date}} - {{hostname}}
 Pull updates on startup: true
 Push on backup: true
 ```
 
-### 6.3 Bewertung
+### 6.3 Evaluation
 
-| Kriterium | Bewertung | Kommentar |
-|-----------|-----------|-----------|
-| Setup-Aufwand | ⭐⭐⭐⭐ | Git + Plugin |
-| Offline-Fähigkeit | ⭐⭐⭐⭐⭐ | Vollständig |
-| Latenz | ⭐⭐⭐⭐⭐ | Lokal = instant |
-| Obsidian-Integration | ⭐⭐⭐⭐⭐ | Perfekt |
-| Konflikt-Risiko | ⭐⭐⭐ | Merge-Konflikte möglich |
+| Criterion | Rating | Comment |
+|-----------|--------|---------|
+| Setup Effort | ⭐⭐⭐⭐ | Git + Plugin |
+| Offline Capability | ⭐⭐⭐⭐⭐ | Full |
+| Latency | ⭐⭐⭐⭐⭐ | Local = instant |
+| Obsidian Integration | ⭐⭐⭐⭐⭐ | Perfect |
+| Conflict Risk | ⭐⭐⭐ | Merge conflicts possible |
 
-**Empfehlung**: Beste Option für die meisten Use Cases.
+**Recommendation**: Best option for most use cases.
 
 ---
 
 ## 7. Option D: Syncthing
 
-### 7.1 Beschreibung
+### 7.1 Description
 
-Peer-to-Peer Synchronisation ohne zentralen Server. Alle Geräte synchronisieren direkt miteinander.
+Peer-to-peer synchronization without a central server. All devices synchronize directly with each other.
 
 ```
 ┌──────────────┐         Syncthing         ┌──────────────┐
@@ -310,21 +310,21 @@ Peer-to-Peer Synchronisation ohne zentralen Server. Alle Geräte synchronisieren
 ### 7.2 Setup
 
 ```bash
-# Auf Server
+# On Server
 sudo apt install syncthing
 sudo systemctl enable syncthing@root
 sudo systemctl start syncthing@root
 
 # Web UI: http://localhost:8384
 
-# Auf Laptop (macOS)
+# On Laptop (macOS)
 brew install syncthing
 brew services start syncthing
 
 # Web UI: http://localhost:8384
 ```
 
-### 7.3 Syncthing Konfiguration
+### 7.3 Syncthing Configuration
 
 ```xml
 <!-- ~/.config/syncthing/config.xml -->
@@ -333,30 +333,30 @@ brew services start syncthing
     <device id="LAPTOP-B-ID" introducedBy=""/>
     <device id="SERVER-ID" introducedBy=""/>
     
-    <!-- Konflikt-Handling -->
+    <!-- Conflict Handling -->
     <maxConflicts>10</maxConflicts>
 </folder>
 ```
 
-### 7.4 Bewertung
+### 7.4 Evaluation
 
-| Kriterium | Bewertung | Kommentar |
-|-----------|-----------|-----------|
-| Setup-Aufwand | ⭐⭐⭐ | Syncthing auf allen Geräten |
-| Offline-Fähigkeit | ⭐⭐⭐⭐⭐ | Vollständig |
-| Latenz | ⭐⭐⭐⭐⭐ | Lokal = instant |
-| Obsidian-Integration | ⭐⭐⭐⭐⭐ | Perfekt |
-| Konflikt-Risiko | ⭐⭐⭐ | Erstellt .sync-conflict Files |
+| Criterion | Rating | Comment |
+|-----------|--------|---------|
+| Setup Effort | ⭐⭐⭐ | Syncthing on all devices |
+| Offline Capability | ⭐⭐⭐⭐⭐ | Full |
+| Latency | ⭐⭐⭐⭐⭐ | Local = instant |
+| Obsidian Integration | ⭐⭐⭐⭐⭐ | Perfect |
+| Conflict Risk | ⭐⭐⭐ | Creates .sync-conflict files |
 
-**Empfehlung**: Gute Alternative zu Git, aber weniger Version Control.
+**Recommendation**: Good alternative to Git, but less version control.
 
 ---
 
 ## 8. Option E: Obsidian Livesync
 
-### 8.1 Beschreibung
+### 8.1 Description
 
-Real-time Synchronisation via CouchDB. Änderungen werden sofort synchronisiert.
+Real-time synchronization via CouchDB. Changes are synchronized immediately.
 
 ```
 ┌──────────────┐                           ┌──────────────┐
@@ -378,7 +378,7 @@ Real-time Synchronisation via CouchDB. Änderungen werden sofort synchronisiert.
 ### 8.2 Setup
 
 ```yaml
-# docker-compose.yml auf Server
+# docker-compose.yml on Server
 version: '3.8'
 services:
   couchdb:
@@ -392,34 +392,34 @@ services:
       - ./couchdb_data:/opt/couchdb/data
 ```
 
-### 8.3 Obsidian Plugin Konfiguration
+### 8.3 Obsidian Plugin Configuration
 
-1. "Self-hosted LiveSync" Plugin installieren
+1. Install "Self-hosted LiveSync" Plugin
 2. Remote Database URI: `http://server:5984/obsidian`
-3. Username/Password eingeben
+3. Enter Username/Password
 4. "Setup" → "Rebuild everything"
 
-### 8.4 Bewertung
+### 8.4 Evaluation
 
-| Kriterium | Bewertung | Kommentar |
-|-----------|-----------|-----------|
-| Setup-Aufwand | ⭐⭐ | CouchDB + Plugin |
-| Offline-Fähigkeit | ⭐⭐⭐⭐ | Ja, mit Sync bei Reconnect |
-| Latenz | ⭐⭐⭐⭐⭐ | Real-time |
-| Obsidian-Integration | ⭐⭐⭐⭐⭐ | Native |
-| Konflikt-Risiko | ⭐⭐⭐⭐ | CRDT-basiert (automatisch) |
+| Criterion | Rating | Comment |
+|-----------|--------|---------|
+| Setup Effort | ⭐⭐ | CouchDB + Plugin |
+| Offline Capability | ⭐⭐⭐⭐ | Yes, with sync on reconnect |
+| Latency | ⭐⭐⭐⭐⭐ | Real-time |
+| Obsidian Integration | ⭐⭐⭐⭐⭐ | Native |
+| Conflict Risk | ⭐⭐⭐⭐ | CRDT-based (automatic) |
 
-**Empfehlung**: Beste Real-time Experience, aber zusätzliche Infrastruktur (CouchDB).
+**Recommendation**: Best real-time experience, but requires additional infrastructure (CouchDB).
 
 ---
 
-## 9. Empfohlene Lösung: Hybrid-Ansatz
+## 9. Recommended Solution: Hybrid Approach
 
-### 9.1 Architektur
+### 9.1 Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                    Hybrid-Lösung                                │
+│                    Hybrid Solution                              │
 │                                                                 │
 │  ┌─────────────────────────────────────────────────────────┐   │
 │  │                    Laptop                                │   │
@@ -449,7 +449,7 @@ services:
 │  │                                                          │   │
 │  │   /shared/knowledge/  ◄── Git Working Copy              │   │
 │  │                                                          │   │
-│  │   OpenCode / Gemini CLI arbeiten hier direkt            │   │
+│  │   OpenCode / Gemini CLI work directly here              │   │
 │  │                                                          │   │
 │  └─────────────────────────────────────────────────────────┘   │
 │                                                                 │
@@ -458,24 +458,24 @@ services:
 
 ### 9.2 Workflow
 
-1. **Obsidian-Nutzer**: Arbeiten lokal, Git Plugin synct automatisch
-2. **CLI-Nutzer**: SSH auf Server, arbeiten direkt in `/shared/knowledge`
-3. **Synchronisation**: Git als Single Source of Truth
-4. **Konflikt-Handling**: Git Merge (siehe Konzeptpapier 04)
+1. **Obsidian Users**: Work locally, Git Plugin syncs automatically
+2. **CLI Users**: SSH to server, work directly in `/shared/knowledge`
+3. **Synchronization**: Git as Single Source of Truth
+4. **Conflict Handling**: Git Merge (see Concept Paper 04)
 
-### 9.3 Vorteile
+### 9.3 Advantages
 
-- ✅ Offline-Fähigkeit für Obsidian-Nutzer
-- ✅ Keine Latenz bei lokaler Arbeit
-- ✅ Vollständige Version History
-- ✅ CLI und GUI können parallel genutzt werden
-- ✅ Keine zusätzliche Infrastruktur (nur GitHub)
+- Offline capability for Obsidian users
+- No latency during local work
+- Complete version history
+- CLI and GUI can be used in parallel
+- No additional infrastructure required (only GitHub)
 
 ---
 
-## 10. Onboarding-Prozess
+## 10. Onboarding Process
 
-### 10.1 Für neue Teammitglieder
+### 10.1 For New Team Members
 
 ```bash
 #!/bin/bash
@@ -483,28 +483,28 @@ services:
 
 echo "=== Team Knowledge Base Onboarding ==="
 
-# 1. SSH Key generieren (falls nicht vorhanden)
+# 1. Generate SSH Key (if not present)
 if [ ! -f ~/.ssh/id_ed25519 ]; then
     ssh-keygen -t ed25519 -C "$USER@company.com"
 fi
 
-# 2. Public Key anzeigen (für Server-Admin)
+# 2. Display Public Key (for Server Admin)
 echo ""
-echo "Bitte sende diesen Public Key an den Admin:"
+echo "Please send this public key to the admin:"
 cat ~/.ssh/id_ed25519.pub
 echo ""
 
-# 3. Repository klonen
-read -p "GitHub-Zugang eingerichtet? (y/n) " -n 1 -r
+# 3. Clone Repository
+read -p "GitHub access configured? (y/n) " -n 1 -r
 echo
 if [[ $REPLY =~ ^[Yy]$ ]]; then
     git clone git@github.com:company/knowledge-base.git ~/knowledge
 fi
 
-# 4. Obsidian konfigurieren
+# 4. Configure Obsidian
 echo ""
 echo "Obsidian Setup:"
-echo "1. Öffne Obsidian"
+echo "1. Open Obsidian"
 echo "2. 'Open folder as vault' → ~/knowledge"
 echo "3. Settings → Community Plugins → Enable"
 echo "4. Browse → 'Obsidian Git' → Install → Enable"
@@ -524,43 +524,43 @@ Host team-server
     ForwardAgent yes
 EOF
 
-echo "Setup complete! Du kannst jetzt:"
-echo "  - Obsidian nutzen für GUI-Zugang"
-echo "  - 'ssh team-server' für CLI-Zugang"
+echo "Setup complete! You can now:"
+echo "  - Use Obsidian for GUI access"
+echo "  - 'ssh team-server' for CLI access"
 ```
 
-### 10.2 Checkliste
+### 10.2 Checklist
 
-- [ ] SSH Key generiert
-- [ ] SSH Key auf Server hinterlegt
-- [ ] GitHub-Zugang eingerichtet
-- [ ] Repository geklont
-- [ ] Obsidian installiert
-- [ ] Obsidian Git Plugin konfiguriert
-- [ ] SSH Config eingerichtet
-- [ ] Test: Datei erstellen, pushen, auf Server prüfen
+- [ ] SSH Key generated
+- [ ] SSH Key added to server
+- [ ] GitHub access configured
+- [ ] Repository cloned
+- [ ] Obsidian installed
+- [ ] Obsidian Git Plugin configured
+- [ ] SSH Config set up
+- [ ] Test: Create file, push, verify on server
 
 ---
 
 ## 11. Troubleshooting
 
-### 11.1 Häufige Probleme
+### 11.1 Common Problems
 
-| Problem | Ursache | Lösung |
-|---------|---------|--------|
-| SSHFS mount hängt | Netzwerk-Timeout | `umount -f ~/knowledge` |
-| Git Push rejected | Remote hat neuere Änderungen | `git pull --rebase` |
-| Obsidian Git Plugin synct nicht | Plugin deaktiviert | Plugin neu aktivieren |
-| Merge-Konflikt | Gleichzeitige Bearbeitung | Siehe Konzeptpapier 04 |
-| SSH Permission denied | Falscher Key | `ssh -v team-server` für Debug |
+| Problem | Cause | Solution |
+|---------|-------|----------|
+| SSHFS mount hangs | Network timeout | `umount -f ~/knowledge` |
+| Git Push rejected | Remote has newer changes | `git pull --rebase` |
+| Obsidian Git Plugin not syncing | Plugin disabled | Re-enable plugin |
+| Merge conflict | Simultaneous editing | See Concept Paper 04 |
+| SSH Permission denied | Wrong key | `ssh -v team-server` for debug |
 
-### 11.2 Debug-Befehle
+### 11.2 Debug Commands
 
 ```bash
-# SSH Verbindung testen
+# Test SSH connection
 ssh -v team-server
 
-# Git Remote prüfen
+# Check Git Remote
 git remote -v
 
 # Git Status
@@ -575,69 +575,77 @@ sshfs -o debug admin@team-server:/shared/knowledge ~/knowledge
 
 ---
 
-## 12. Sicherheitsaspekte
+## 12. Security Aspects
 
 ### 12.1 SSH Key Management
 
 ```bash
-# Ed25519 Keys verwenden (sicherer als RSA)
+# Use Ed25519 Keys (more secure than RSA)
 ssh-keygen -t ed25519 -C "user@company.com"
 
-# Key mit Passphrase schützen
-# (wird beim Generieren abgefragt)
+# Protect key with passphrase
+# (prompted during generation)
 
-# SSH Agent für Passphrase-Caching
+# SSH Agent for passphrase caching
 eval "$(ssh-agent -s)"
 ssh-add ~/.ssh/id_ed25519
 ```
 
-### 12.2 GitHub Repository Sicherheit
+### 12.2 GitHub Repository Security
 
 - Private Repository
-- Branch Protection für `main`
+- Branch Protection for `main`
 - Require Pull Request Reviews (optional)
 - Signed Commits (optional)
 
-### 12.3 Lokale Sicherheit
+### 12.3 Local Security
 
 ```bash
-# Vault-Ordner verschlüsseln (macOS)
-# FileVault aktivieren (System Preferences → Security)
+# Encrypt vault folder (macOS)
+# Enable FileVault (System Preferences → Security)
 
-# Oder: Encrypted Sparse Bundle
+# Or: Encrypted Sparse Bundle
 hdiutil create -size 10g -type SPARSEBUNDLE -encryption AES-256 \
     -fs APFS -volname "Knowledge" ~/knowledge.sparsebundle
 ```
 
 ---
 
-## 13. Zusammenfassung
+## 13. Summary
 
-### Empfohlene Konfiguration
+### Recommended Configuration
 
-| Komponente | Lösung |
-|------------|--------|
-| **Primärer Zugang** | Git Sync + Obsidian Git Plugin |
-| **CLI-Zugang** | SSH direkt auf Server |
-| **Backup-Zugang** | SSHFS (bei Git-Problemen) |
+| Component | Solution |
+|-----------|----------|
+| **Primary Access** | Git Sync + Obsidian Git Plugin |
+| **CLI Access** | SSH directly to server |
+| **Backup Access** | SSHFS (for Git issues) |
 | **Version Control** | GitHub Private Repository |
 
-### Entscheidungsmatrix
+### Decision Matrix
 
-| Wenn... | Dann... |
-|---------|---------|
-| Nur CLI-Arbeit | SSH auf Server |
+| If... | Then... |
+|-------|---------|
+| CLI work only | SSH to server |
 | Obsidian + Offline | Git Sync |
 | Real-time Collaboration | Obsidian Livesync (+ CouchDB) |
-| Einfachster Setup | SSHFS |
-| Maximale Kontrolle | Git Sync |
+| Simplest Setup | SSHFS |
+| Maximum Control | Git Sync |
 
 ---
 
-## Anhang A: Referenzen
+## Appendix A: References
 
 - [Obsidian Git Plugin](https://github.com/denolehov/obsidian-git)
 - [Obsidian Livesync](https://github.com/vrtmrz/obsidian-livesync)
 - [SSHFS](https://github.com/libfuse/sshfs)
 - [Syncthing](https://syncthing.net/)
 - [macFUSE](https://osxfuse.github.io/)
+
+---
+
+## Related Documents
+
+- [[00-vision]]
+- [[01-knowledge-base-document-search]]
+- [[05-overall-architecture]]

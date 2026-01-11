@@ -1,15 +1,15 @@
-# Konzeptpapier: Gesamtarchitektur - TeamOS Knowledge Platform
+# Concept Paper: Overall Architecture - TeamOS Knowledge Platform
 
-**Version:** 1.0  
-**Datum:** 2025-01-10  
-**Status:** Entwurf  
-**Autor:** IT Architecture Team
+**Version:** 1.1  
+**Date:** 2025-01-11  
+**Status:** Implemented  
+**Author:** TeamOS
 
 ---
 
 ## 1. Executive Summary
 
-Dieses Dokument beschreibt die Gesamtarchitektur der TeamOS Knowledge Platform - einer integrierten Lösung für team-weites Wissensmanagement, optimiert für die Nutzung mit AI-gestützten CLI-Tools (OpenCode, Gemini CLI) und traditionellen GUI-Tools (Obsidian). Die Architektur verbindet alle Komponenten aus den vorherigen Konzeptpapieren zu einem kohärenten System.
+This document describes the overall architecture of the TeamOS Knowledge Platform - an integrated solution for team-wide knowledge management, optimized for use with AI-powered CLI tools (OpenCode, Gemini CLI) and traditional GUI tools (Obsidian). The architecture connects all components from the previous concept papers into a coherent system.
 
 ---
 
@@ -20,24 +20,24 @@ Dieses Dokument beschreibt die Gesamtarchitektur der TeamOS Knowledge Platform -
 │                                                                             │
 │                         "Knowledge at Your Fingertips"                      │
 │                                                                             │
-│   Ein Team von 10 IT-Spezialisten, die Tier 0/1 Enterprise Tools           │
-│   (Entra ID, Google Workspace, Atlassian, Slack) verwalten, teilt          │
-│   Wissen nahtlos über CLI und GUI, unterstützt von AI-Agenten.             │
+│   A team of 10 IT specialists who manage Tier 0/1 Enterprise Tools         │
+│   (Entra ID, Google Workspace, Atlassian, Slack) share knowledge           │
+│   seamlessly via CLI and GUI, supported by AI agents.                       │
 │                                                                             │
-│   Jedes Teammitglied kann:                                                  │
-│   ✓ Wissen in Sekunden finden (nicht Minuten)                              │
-│   ✓ Dokumentation erstellen, die AI-Agenten verstehen                      │
-│   ✓ Offline arbeiten und später synchronisieren                            │
-│   ✓ Nachvollziehen, wer was wann geändert hat                              │
+│   Each team member can:                                                     │
+│   ✓ Find knowledge in seconds (not minutes)                                │
+│   ✓ Create documentation that AI agents understand                         │
+│   ✓ Work offline and synchronize later                                     │
+│   ✓ Track who changed what and when                                        │
 │                                                                             │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 3. Architektur-Übersicht
+## 3. Architecture Overview
 
-### 3.1 High-Level Architektur
+### 3.1 High-Level Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
@@ -127,38 +127,38 @@ Dieses Dokument beschreibt die Gesamtarchitektur der TeamOS Knowledge Platform -
 
 ---
 
-## 4. Komponenten-Übersicht
+## 4. Component Overview
 
-### 4.1 Komponenten-Matrix
+### 4.1 Component Matrix
 
-| Komponente | Purpose | Technologie | Standort |
+| Component | Purpose | Technology | Location |
 |------------|---------|-------------|----------|
-| **Knowledge Store** | Markdown-Dateien speichern | Git + Filesystem | Server + GitHub |
-| **Search Engine** | Volltextsuche | MeiliSearch | Server (Docker) |
-| **Version Control** | Änderungshistorie | Git + GitHub | Dezentral |
-| **Audit System** | Sicherheits-Logging | auditd | Server |
-| **Log Aggregation** | Zentrale Logs | fluent-bit → GCP | Server → Cloud |
-| **Monitoring** | Metriken & Alerts | GCP Monitoring | Cloud |
-| **Client Access** | GUI-Zugang | Obsidian + Git | Laptops |
-| **CLI Access** | Terminal-Zugang | SSH | Laptops → Server |
+| **Knowledge Store** | Store Markdown files | Git + Filesystem | Server + GitHub |
+| **Search Engine** | Full-text search | MeiliSearch | Server (Docker) |
+| **Version Control** | Change history | Git + GitHub | Decentralized |
+| **Audit System** | Security logging | auditd | Server |
+| **Log Aggregation** | Centralized logs | fluent-bit → GCP | Server → Cloud |
+| **Monitoring** | Metrics & Alerts | GCP Monitoring | Cloud |
+| **Client Access** | GUI access | Obsidian + Git | Laptops |
+| **CLI Access** | Terminal access | SSH | Laptops → Server |
 
-### 4.2 Komponenten-Diagramm
+### 4.2 Component Diagram
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                         KOMPONENTEN & DATENFLUSS                            │
+│                         COMPONENTS & DATA FLOW                              │
 │                                                                             │
 │                                                                             │
 │   ┌─────────────┐                                                          │
-│   │   MENSCH    │                                                          │
+│   │   HUMAN     │                                                          │
 │   │  (Editor)   │                                                          │
 │   └──────┬──────┘                                                          │
 │          │                                                                  │
-│          │ schreibt/liest                                                  │
+│          │ writes/reads                                                     │
 │          ▼                                                                  │
 │   ┌─────────────┐         ┌─────────────┐         ┌─────────────┐         │
 │   │  Obsidian   │◄───────►│    Git      │◄───────►│   GitHub    │         │
-│   │  (lokal)    │  sync   │  (lokal)    │  push   │  (remote)   │         │
+│   │  (local)    │  sync   │  (local)    │  push   │  (remote)   │         │
 │   └─────────────┘         └─────────────┘         └──────┬──────┘         │
 │                                                          │                 │
 │                                                          │ pull            │
@@ -176,7 +176,7 @@ Dieses Dokument beschreibt die Gesamtarchitektur der TeamOS Knowledge Platform -
 │   │  (Search)   │         │  (Audit)    │         │   (Logs)    │         │
 │   └─────────────┘         └─────────────┘         └──────┬──────┘         │
 │          │                       │                       │                 │
-│          │ indexiert             │ loggt                 │ forwarded       │
+│          │ indexes               │ logs                  │ forwards        │
 │          ▼                       ▼                       ▼                 │
 │   ┌─────────────┐         ┌─────────────┐         ┌─────────────┐         │
 │   │   Search    │         │   Audit     │         │ GCP Cloud   │         │
@@ -188,7 +188,7 @@ Dieses Dokument beschreibt die Gesamtarchitektur der TeamOS Knowledge Platform -
 
 ---
 
-## 5. Detaillierte Komponenten-Beschreibung
+## 5. Detailed Component Description
 
 ### 5.1 Knowledge Store
 
@@ -197,34 +197,34 @@ Dieses Dokument beschreibt die Gesamtarchitektur der TeamOS Knowledge Platform -
 │                           KNOWLEDGE STORE                                   │
 │                                                                             │
 │  PURPOSE:                                                                   │
-│  Zentrale Speicherung aller Dokumentation in Markdown-Format               │
+│  Central storage of all documentation in Markdown format                    │
 │                                                                             │
-│  TECHNOLOGIE:                                                               │
-│  - Filesystem: ext4 auf GCP Persistent Disk                                │
+│  TECHNOLOGY:                                                                │
+│  - Filesystem: ext4 on GCP Persistent Disk                                 │
 │  - Version Control: Git                                                     │
 │  - Remote: GitHub Private Repository                                        │
 │                                                                             │
-│  STRUKTUR:                                                                  │
+│  STRUCTURE:                                                                 │
 │  /shared/knowledge/                                                         │
 │  ├── .git/                    # Git Repository                             │
 │  ├── .github/                                                              │
-│  │   └── CODEOWNERS           # Ownership-Regeln                           │
-│  ├── api-docs/                # API-Dokumentation                          │
+│  │   └── CODEOWNERS           # Ownership rules                            │
+│  ├── api-docs/                # API documentation                          │
 │  │   ├── entra-id/                                                         │
 │  │   ├── google-workspace/                                                 │
 │  │   ├── atlassian/                                                        │
 │  │   └── slack/                                                            │
-│  ├── runbooks/                # Operative Runbooks                         │
+│  ├── runbooks/                # Operational runbooks                       │
 │  ├── decisions/               # ADRs                                       │
 │  ├── guides/                  # How-To Guides                              │
-│  └── templates/               # Dokumentvorlagen                           │
+│  └── templates/               # Document templates                         │
 │                                                                             │
 │  INTEGRATION:                                                               │
-│  - MeiliSearch indexiert alle .md Dateien                                  │
-│  - Pre-commit Hooks validieren Frontmatter                                 │
-│  - File Watcher triggert Re-Indexierung                                    │
+│  - MeiliSearch indexes all .md files                                       │
+│  - Pre-commit hooks validate frontmatter                                   │
+│  - File watcher triggers re-indexing                                       │
 │                                                                             │
-│  DATENFLUSS:                                                                │
+│  DATA FLOW:                                                                 │
 │  ┌────────┐    write    ┌────────┐    push    ┌────────┐                  │
 │  │ Editor │────────────►│  Git   │───────────►│ GitHub │                  │
 │  └────────┘             └────────┘            └────────┘                  │
@@ -246,20 +246,20 @@ Dieses Dokument beschreibt die Gesamtarchitektur der TeamOS Knowledge Platform -
 │                           SEARCH ENGINE                                     │
 │                                                                             │
 │  PURPOSE:                                                                   │
-│  Schnelle Volltextsuche über alle Dokumente für Menschen und LLMs          │
+│  Fast full-text search across all documents for humans and LLMs            │
 │                                                                             │
-│  TECHNOLOGIE:                                                               │
+│  TECHNOLOGY:                                                                │
 │  - MeiliSearch v1.6 (Docker Container)                                     │
-│  - REST API auf Port 7700                                                  │
-│  - ~500MB RAM für 10.000 Dokumente                                         │
+│  - REST API on port 7700                                                   │
+│  - ~500MB RAM for 10,000 documents                                         │
 │                                                                             │
 │  FEATURES:                                                                  │
-│  - Typo-tolerante Suche                                                    │
-│  - Faceted Search (Tags, Kategorie, Autor)                                 │
-│  - Sub-50ms Latenz                                                         │
-│  - Real-time Indexierung via File Watcher                                  │
+│  - Typo-tolerant search                                                    │
+│  - Faceted search (tags, category, author)                                 │
+│  - Sub-50ms latency                                                        │
+│  - Real-time indexing via file watcher                                     │
 │                                                                             │
-│  DATENFLUSS:                                                                │
+│  DATA FLOW:                                                                 │
 │                                                                             │
 │  ┌─────────────┐    inotify    ┌─────────────┐    index    ┌────────────┐ │
 │  │  Knowledge  │──────────────►│ File Watcher│────────────►│ MeiliSearch│ │
@@ -272,7 +272,7 @@ Dieses Dokument beschreibt die Gesamtarchitektur der TeamOS Knowledge Platform -
 │  │   Client    │   results     │   Server    │                            │
 │  └─────────────┘               └─────────────┘                            │
 │                                                                             │
-│  API BEISPIEL:                                                              │
+│  API EXAMPLE:                                                               │
 │  POST /indexes/knowledge/search                                            │
 │  {"q": "Entra ID API authentication", "limit": 5}                          │
 │                                                                             │
@@ -286,28 +286,28 @@ Dieses Dokument beschreibt die Gesamtarchitektur der TeamOS Knowledge Platform -
 │                           AUDIT SYSTEM                                      │
 │                                                                             │
 │  PURPOSE:                                                                   │
-│  Nachvollziehbarkeit aller Aktionen für Compliance und Debugging           │
+│  Traceability of all actions for compliance and debugging                  │
 │                                                                             │
-│  TECHNOLOGIE:                                                               │
+│  TECHNOLOGY:                                                                │
 │  - auditd (Linux Kernel Audit)                                             │
 │  - fluent-bit (Log Forwarding)                                             │
 │  - GCP Cloud Logging (Immutable Storage)                                   │
 │                                                                             │
-│  WAS WIRD GELOGGT:                                                          │
+│  WHAT IS LOGGED:                                                            │
 │  ┌─────────────────────────────────────────────────────────────────────┐   │
-│  │  - Alle Dateiänderungen in /shared/knowledge                        │   │
-│  │  - SSH-Logins und -Logouts                                          │   │
-│  │  - Sudo-Nutzung                                                     │   │
-│  │  - User-Management (useradd, userdel, passwd)                       │   │
-│  │  - Privilegierte Befehle                                            │   │
-│  │  - Fehlgeschlagene Zugriffsversuche                                 │   │
+│  │  - All file changes in /shared/knowledge                            │   │
+│  │  - SSH logins and logouts                                           │   │
+│  │  - Sudo usage                                                       │   │
+│  │  - User management (useradd, userdel, passwd)                       │   │
+│  │  - Privileged commands                                              │   │
+│  │  - Failed access attempts                                           │   │
 │  └─────────────────────────────────────────────────────────────────────┘   │
 │                                                                             │
-│  DATENFLUSS:                                                                │
+│  DATA FLOW:                                                                 │
 │                                                                             │
 │  ┌─────────────┐    syscall    ┌─────────────┐    log     ┌─────────────┐ │
 │  │   Kernel    │──────────────►│   auditd    │───────────►│ /var/log/   │ │
-│  │  (Aktionen) │               │             │            │ audit/      │ │
+│  │  (Actions)  │               │             │            │ audit/      │ │
 │  └─────────────┘               └─────────────┘            └──────┬──────┘ │
 │                                                                   │        │
 │                                                                   │        │
@@ -319,7 +319,7 @@ Dieses Dokument beschreibt die Gesamtarchitektur der TeamOS Knowledge Platform -
 │        │ immutable                                                         │
 │        ▼                                                                   │
 │  ┌─────────────┐                                                          │
-│  │  30+ Tage   │                                                          │
+│  │  30+ Days   │                                                          │
 │  │  Retention  │                                                          │
 │  └─────────────┘                                                          │
 │                                                                             │
@@ -333,9 +333,9 @@ Dieses Dokument beschreibt die Gesamtarchitektur der TeamOS Knowledge Platform -
 │                           CLIENT ACCESS                                     │
 │                                                                             │
 │  PURPOSE:                                                                   │
-│  Zugang zur Knowledge Base von Mitarbeiter-Laptops                         │
+│  Access to the Knowledge Base from employee laptops                        │
 │                                                                             │
-│  ZWEI ZUGANGSARTEN:                                                         │
+│  TWO ACCESS TYPES:                                                          │
 │                                                                             │
 │  ┌─────────────────────────────────┐  ┌─────────────────────────────────┐  │
 │  │         GUI ACCESS              │  │         CLI ACCESS              │  │
@@ -345,25 +345,25 @@ Dieses Dokument beschreibt die Gesamtarchitektur der TeamOS Knowledge Platform -
 │  │  │             │               │  │  │             │               │  │
 │  │  └──────┬──────┘               │  │  └──────┬──────┘               │  │
 │  │         │                       │  │         │                       │  │
-│  │         │ liest/schreibt        │  │         │ SSH                   │  │
+│  │         │ reads/writes          │  │         │ SSH                   │  │
 │  │         ▼                       │  │         ▼                       │  │
 │  │  ┌─────────────┐               │  │  ┌─────────────┐               │  │
 │  │  │ ~/knowledge │               │  │  │   Server    │               │  │
 │  │  │ (Git Clone) │               │  │  │             │               │  │
 │  │  └──────┬──────┘               │  │  └──────┬──────┘               │  │
 │  │         │                       │  │         │                       │  │
-│  │         │ Git Sync              │  │         │ direkt                │  │
+│  │         │ Git Sync              │  │         │ direct                │  │
 │  │         ▼                       │  │         ▼                       │  │
 │  │  ┌─────────────┐               │  │  ┌─────────────┐               │  │
 │  │  │   GitHub    │               │  │  │  /shared/   │               │  │
 │  │  │             │               │  │  │  knowledge/ │               │  │
 │  │  └─────────────┘               │  │  └─────────────┘               │  │
 │  │                                 │  │                                 │  │
-│  │  VORTEILE:                      │  │  VORTEILE:                      │  │
-│  │  - Offline-fähig                │  │  - Kein lokaler Clone nötig    │  │
-│  │  - Schnelle Navigation          │  │  - Direkter Zugriff            │  │
+│  │  ADVANTAGES:                    │  │  ADVANTAGES:                    │  │
+│  │  - Offline capable              │  │  - No local clone needed       │  │
+│  │  - Fast navigation              │  │  - Direct access               │  │
 │  │  - Graph View                   │  │  - OpenCode/Gemini CLI         │  │
-│  │                                 │  │  - Immer aktuell               │  │
+│  │                                 │  │  - Always up to date           │  │
 │  └─────────────────────────────────┘  └─────────────────────────────────┘  │
 │                                                                             │
 └─────────────────────────────────────────────────────────────────────────────┘
@@ -371,20 +371,20 @@ Dieses Dokument beschreibt die Gesamtarchitektur der TeamOS Knowledge Platform -
 
 ---
 
-## 6. Datenfluss-Diagramme
+## 6. Data Flow Diagrams
 
-### 6.1 Dokument erstellen (GUI)
+### 6.1 Create Document (GUI)
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                    WORKFLOW: Dokument erstellen (Obsidian)                  │
+│                    WORKFLOW: Create Document (Obsidian)                     │
 │                                                                             │
-│  1. User erstellt Datei in Obsidian                                        │
+│  1. User creates file in Obsidian                                          │
 │     ┌─────────────┐                                                        │
 │     │  Obsidian   │ → new-doc.md                                           │
 │     └──────┬──────┘                                                        │
 │            │                                                                │
-│  2. Obsidian Git Plugin committed automatisch (alle 5 Min)                 │
+│  2. Obsidian Git Plugin commits automatically (every 5 min)                │
 │            │                                                                │
 │            ▼                                                                │
 │     ┌─────────────┐                                                        │
@@ -393,7 +393,7 @@ Dieses Dokument beschreibt die Gesamtarchitektur der TeamOS Knowledge Platform -
 │     │  git push   │                                                        │
 │     └──────┬──────┘                                                        │
 │            │                                                                │
-│  3. GitHub empfängt Push                                                   │
+│  3. GitHub receives push                                                   │
 │            │                                                                │
 │            ▼                                                                │
 │     ┌─────────────┐                                                        │
@@ -401,7 +401,7 @@ Dieses Dokument beschreibt die Gesamtarchitektur der TeamOS Knowledge Platform -
 │     │  (remote)   │                                                        │
 │     └──────┬──────┘                                                        │
 │            │                                                                │
-│  4. Server pullt Änderungen (Cron alle 5 Min)                              │
+│  4. Server pulls changes (Cron every 5 min)                                │
 │            │                                                                │
 │            ▼                                                                │
 │     ┌─────────────┐                                                        │
@@ -409,31 +409,31 @@ Dieses Dokument beschreibt die Gesamtarchitektur der TeamOS Knowledge Platform -
 │     │  git pull   │                                                        │
 │     └──────┬──────┘                                                        │
 │            │                                                                │
-│  5. File Watcher erkennt neue Datei                                        │
+│  5. File watcher detects new file                                          │
 │            │                                                                │
 │            ▼                                                                │
 │     ┌─────────────┐                                                        │
-│     │ MeiliSearch │ → Dokument indexiert                                   │
+│     │ MeiliSearch │ → Document indexed                                     │
 │     │   Indexer   │                                                        │
 │     └─────────────┘                                                        │
 │                                                                             │
-│  LATENZ: ~5-10 Minuten bis Dokument auf Server und in Suche                │
+│  LATENCY: ~5-10 minutes until document is on server and in search          │
 │                                                                             │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
-### 6.2 Dokument erstellen (CLI/LLM)
+### 6.2 Create Document (CLI/LLM)
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                    WORKFLOW: Dokument erstellen (CLI/LLM)                   │
+│                    WORKFLOW: Create Document (CLI/LLM)                      │
 │                                                                             │
-│  1. User/LLM verbindet via SSH                                             │
+│  1. User/LLM connects via SSH                                              │
 │     ┌─────────────┐                                                        │
 │     │  Terminal   │ → ssh team-server                                      │
 │     └──────┬──────┘                                                        │
 │            │                                                                │
-│  2. Datei wird direkt auf Server erstellt                                  │
+│  2. File is created directly on server                                     │
 │            │                                                                │
 │            ▼                                                                │
 │     ┌─────────────┐                                                        │
@@ -441,15 +441,15 @@ Dieses Dokument beschreibt die Gesamtarchitektur der TeamOS Knowledge Platform -
 │     │  (Server)   │                                                        │
 │     └──────┬──────┘                                                        │
 │            │                                                                │
-│  3. File Watcher erkennt sofort                                            │
+│  3. File watcher detects immediately                                       │
 │            │                                                                │
 │            ▼                                                                │
 │     ┌─────────────┐                                                        │
-│     │ MeiliSearch │ → Dokument indexiert                                   │
+│     │ MeiliSearch │ → Document indexed                                     │
 │     │   Indexer   │                                                        │
 │     └──────┬──────┘                                                        │
 │            │                                                                │
-│  4. Git Commit (manuell oder via Hook)                                     │
+│  4. Git commit (manual or via hook)                                        │
 │            │                                                                │
 │            ▼                                                                │
 │     ┌─────────────┐                                                        │
@@ -458,23 +458,24 @@ Dieses Dokument beschreibt die Gesamtarchitektur der TeamOS Knowledge Platform -
 │     │  git push   │                                                        │
 │     └──────┬──────┘                                                        │
 │            │                                                                │
-│  5. GitHub empfängt Push                                                   │
+│  5. GitHub receives push                                                   │
 │            │                                                                │
 │            ▼                                                                │
 │     ┌─────────────┐                                                        │
 │     │   GitHub    │                                                        │
 │     └─────────────┘                                                        │
 │                                                                             │
-│  LATENZ: Sekunden bis Dokument in Suche, Minuten bis auf anderen Clients   │
+│  LATENCY: Seconds until document is in search, minutes until on other      │
+│           clients                                                           │
 │                                                                             │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
-### 6.3 Dokument suchen
+### 6.3 Search Document
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                    WORKFLOW: Dokument suchen                                │
+│                    WORKFLOW: Search Document                                │
 │                                                                             │
 │  OPTION A: CLI                                                              │
 │  ┌─────────────┐                                                           │
@@ -484,7 +485,7 @@ Dieses Dokument beschreibt die Gesamtarchitektur der TeamOS Knowledge Platform -
 │         │ REST API                                                          │
 │         ▼                                                                   │
 │  ┌─────────────┐                                                           │
-│  │ MeiliSearch │ → Ergebnisse                                              │
+│  │ MeiliSearch │ → Results                                                 │
 │  └─────────────┘                                                           │
 │                                                                             │
 │  OPTION B: LLM Agent                                                        │
@@ -495,23 +496,23 @@ Dieses Dokument beschreibt die Gesamtarchitektur der TeamOS Knowledge Platform -
 │         │ REST API                                                          │
 │         ▼                                                                   │
 │  ┌─────────────┐                                                           │
-│  │ MeiliSearch │ → JSON Response → LLM verarbeitet                         │
+│  │ MeiliSearch │ → JSON Response → LLM processes                           │
 │  └─────────────┘                                                           │
 │                                                                             │
 │  OPTION C: Obsidian                                                         │
 │  ┌─────────────┐                                                           │
-│  │  Obsidian   │ → Lokale Suche (Ctrl+Shift+F)                             │
-│  │  (lokal)    │ → Oder: Graph View Navigation                             │
+│  │  Obsidian   │ → Local search (Ctrl+Shift+F)                             │
+│  │  (local)    │ → Or: Graph View navigation                               │
 │  └─────────────┘                                                           │
 │                                                                             │
-│  LATENZ: <50ms für MeiliSearch, instant für lokale Obsidian-Suche          │
+│  LATENCY: <50ms for MeiliSearch, instant for local Obsidian search         │
 │                                                                             │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 7. Sicherheitsarchitektur
+## 7. Security Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
@@ -520,9 +521,9 @@ Dieses Dokument beschreibt die Gesamtarchitektur der TeamOS Knowledge Platform -
 │  ┌─────────────────────────────────────────────────────────────────────┐   │
 │  │  LAYER 1: NETWORK                                                    │   │
 │  │                                                                      │   │
-│  │  - VPC mit Private IP                                               │   │
-│  │  - Firewall: SSH nur von Office IP / VPN                            │   │
-│  │  - Kein direkter Internet-Zugang für Services                       │   │
+│  │  - VPC with Private IP                                              │   │
+│  │  - Firewall: SSH only from Office IP / VPN                          │   │
+│  │  - No direct internet access for services                           │   │
 │  │  - IAP (Identity-Aware Proxy) optional                              │   │
 │  └─────────────────────────────────────────────────────────────────────┘   │
 │                                     │                                       │
@@ -530,10 +531,10 @@ Dieses Dokument beschreibt die Gesamtarchitektur der TeamOS Knowledge Platform -
 │  ┌─────────────────────────────────────────────────────────────────────┐   │
 │  │  LAYER 2: AUTHENTICATION                                            │   │
 │  │                                                                      │   │
-│  │  - SSH Key-basiert (Ed25519)                                        │   │
-│  │  - Keine Passwort-Authentifizierung                                 │   │
+│  │  - SSH Key-based (Ed25519)                                          │   │
+│  │  - No password authentication                                       │   │
 │  │  - Optional: SSO via Entra ID (OS Login)                            │   │
-│  │  - GitHub: SSH Keys oder Personal Access Tokens                     │   │
+│  │  - GitHub: SSH Keys or Personal Access Tokens                       │   │
 │  └─────────────────────────────────────────────────────────────────────┘   │
 │                                     │                                       │
 │                                     ▼                                       │
@@ -541,19 +542,19 @@ Dieses Dokument beschreibt die Gesamtarchitektur der TeamOS Knowledge Platform -
 │  │  LAYER 3: AUTHORIZATION                                             │   │
 │  │                                                                      │   │
 │  │  - Linux Groups (users, docker, sudo)                               │   │
-│  │  - File Permissions (SGID auf /shared)                              │   │
-│  │  - CODEOWNERS für GitHub PRs                                        │   │
-│  │  - Least Privilege Prinzip                                          │   │
+│  │  - File Permissions (SGID on /shared)                               │   │
+│  │  - CODEOWNERS for GitHub PRs                                        │   │
+│  │  - Least Privilege Principle                                        │   │
 │  └─────────────────────────────────────────────────────────────────────┘   │
 │                                     │                                       │
 │                                     ▼                                       │
 │  ┌─────────────────────────────────────────────────────────────────────┐   │
 │  │  LAYER 4: AUDIT & MONITORING                                        │   │
 │  │                                                                      │   │
-│  │  - auditd für alle Dateioperationen                                 │   │
-│  │  - Session Recording                                                │   │
-│  │  - Immutable Logs in GCP Cloud Logging                              │   │
-│  │  - Alerting bei verdächtigen Aktivitäten                            │   │
+│  │  - auditd for all file operations                                   │   │
+│  │  - Session recording                                                │   │
+│  │  - Immutable logs in GCP Cloud Logging                              │   │
+│  │  - Alerting on suspicious activities                                │   │
 │  └─────────────────────────────────────────────────────────────────────┘   │
 │                                     │                                       │
 │                                     ▼                                       │
@@ -562,7 +563,7 @@ Dieses Dokument beschreibt die Gesamtarchitektur der TeamOS Knowledge Platform -
 │  │                                                                      │   │
 │  │  - Encryption at Rest (GCP Disk Encryption)                         │   │
 │  │  - Encryption in Transit (SSH, HTTPS)                               │   │
-│  │  - Git History für Datenwiederherstellung                           │   │
+│  │  - Git History for data recovery                                    │   │
 │  │  - Daily Backups (Snapshots + Git)                                  │   │
 │  └─────────────────────────────────────────────────────────────────────┘   │
 │                                                                             │
@@ -571,7 +572,7 @@ Dieses Dokument beschreibt die Gesamtarchitektur der TeamOS Knowledge Platform -
 
 ---
 
-## 8. Deployment-Architektur
+## 8. Deployment Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
@@ -639,138 +640,138 @@ Dieses Dokument beschreibt die Gesamtarchitektur der TeamOS Knowledge Platform -
 
 ---
 
-## 9. Kosten-Schätzung
+## 9. Cost Estimate
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                           MONATLICHE KOSTEN (geschätzt)                     │
+│                           MONTHLY COSTS (estimated)                         │
 │                                                                             │
 │  ┌─────────────────────────────────────────────────────────────────────┐   │
 │  │  COMPUTE                                                             │   │
 │  │                                                                      │   │
 │  │  e2-standard-4 (4 vCPU, 16 GB RAM)                                  │   │
 │  │  Region: europe-west3                                                │   │
-│  │  24/7 Betrieb                                                        │   │
+│  │  24/7 operation                                                      │   │
 │  │                                                                      │   │
-│  │  Kosten: ~$100/Monat                                                │   │
-│  │  (Mit Committed Use: ~$60/Monat)                                    │   │
+│  │  Cost: ~$100/month                                                  │   │
+│  │  (With Committed Use: ~$60/month)                                   │   │
 │  └─────────────────────────────────────────────────────────────────────┘   │
 │                                                                             │
 │  ┌─────────────────────────────────────────────────────────────────────┐   │
 │  │  STORAGE                                                             │   │
 │  │                                                                      │   │
-│  │  Boot Disk: 50 GB SSD = ~$8/Monat                                   │   │
-│  │  Data Disk: 200 GB SSD = ~$34/Monat                                 │   │
-│  │  Snapshots: ~$5/Monat (geschätzt)                                   │   │
+│  │  Boot Disk: 50 GB SSD = ~$8/month                                   │   │
+│  │  Data Disk: 200 GB SSD = ~$34/month                                 │   │
+│  │  Snapshots: ~$5/month (estimated)                                   │   │
 │  │                                                                      │   │
-│  │  Kosten: ~$47/Monat                                                 │   │
+│  │  Cost: ~$47/month                                                   │   │
 │  └─────────────────────────────────────────────────────────────────────┘   │
 │                                                                             │
 │  ┌─────────────────────────────────────────────────────────────────────┐   │
 │  │  NETWORKING                                                          │   │
 │  │                                                                      │   │
-│  │  Egress: Minimal (SSH Traffic)                                      │   │
-│  │  Keine externe IP = keine NAT-Kosten                                │   │
+│  │  Egress: Minimal (SSH traffic)                                      │   │
+│  │  No external IP = no NAT costs                                      │   │
 │  │                                                                      │   │
-│  │  Kosten: ~$5/Monat                                                  │   │
+│  │  Cost: ~$5/month                                                    │   │
 │  └─────────────────────────────────────────────────────────────────────┘   │
 │                                                                             │
 │  ┌─────────────────────────────────────────────────────────────────────┐   │
 │  │  LOGGING & MONITORING                                                │   │
 │  │                                                                      │   │
-│  │  Cloud Logging: 50 GB/Monat kostenlos                               │   │
-│  │  Cloud Monitoring: Basis kostenlos                                  │   │
+│  │  Cloud Logging: 50 GB/month free                                    │   │
+│  │  Cloud Monitoring: Basic free                                       │   │
 │  │                                                                      │   │
-│  │  Kosten: ~$0/Monat (unter Free Tier)                                │   │
+│  │  Cost: ~$0/month (under Free Tier)                                  │   │
 │  └─────────────────────────────────────────────────────────────────────┘   │
 │                                                                             │
 │  ┌─────────────────────────────────────────────────────────────────────┐   │
 │  │  GITHUB                                                              │   │
 │  │                                                                      │   │
-│  │  GitHub Team: $4/User/Monat × 10 User                               │   │
+│  │  GitHub Team: $4/User/month × 10 Users                              │   │
 │  │                                                                      │   │
-│  │  Kosten: ~$40/Monat                                                 │   │
+│  │  Cost: ~$40/month                                                   │   │
 │  └─────────────────────────────────────────────────────────────────────┘   │
 │                                                                             │
 │  ═══════════════════════════════════════════════════════════════════════   │
 │                                                                             │
-│  GESAMT: ~$190-200/Monat                                                   │
-│  (Mit Committed Use Discounts: ~$150/Monat)                                │
+│  TOTAL: ~$190-200/month                                                    │
+│  (With Committed Use Discounts: ~$150/month)                               │
 │                                                                             │
-│  PRO PERSON: ~$15-20/Monat                                                 │
+│  PER PERSON: ~$15-20/month                                                 │
 │                                                                             │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 10. Implementierungs-Roadmap
+## 10. Implementation Roadmap
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                           IMPLEMENTIERUNGS-ROADMAP                          │
+│                           IMPLEMENTATION ROADMAP                            │
 │                                                                             │
-│  PHASE 1: FOUNDATION (Woche 1-2)                                           │
+│  PHASE 1: FOUNDATION (Week 1-2)                                            │
 │  ════════════════════════════════                                          │
 │  ┌─────────────────────────────────────────────────────────────────────┐   │
-│  │  □ GCP Projekt einrichten                                           │   │
-│  │  □ VPC und Firewall konfigurieren                                   │   │
-│  │  □ VM provisionieren (Terraform)                                    │   │
-│  │  □ Basis-OS konfigurieren                                           │   │
-│  │  □ Docker installieren                                              │   │
-│  │  □ GitHub Repository erstellen                                      │   │
+│  │  □ Set up GCP project                                               │   │
+│  │  □ Configure VPC and firewall                                       │   │
+│  │  □ Provision VM (Terraform)                                         │   │
+│  │  □ Configure base OS                                                │   │
+│  │  □ Install Docker                                                   │   │
+│  │  □ Create GitHub repository                                         │   │
 │  └─────────────────────────────────────────────────────────────────────┘   │
 │                                                                             │
-│  PHASE 2: CORE SERVICES (Woche 2-3)                                        │
+│  PHASE 2: CORE SERVICES (Week 2-3)                                         │
 │  ═══════════════════════════════════                                       │
 │  ┌─────────────────────────────────────────────────────────────────────┐   │
-│  │  □ MeiliSearch Container deployen                                   │   │
-│  │  □ Indexer-Script implementieren                                    │   │
-│  │  □ File Watcher einrichten                                          │   │
-│  │  □ auditd konfigurieren                                             │   │
+│  │  □ Deploy MeiliSearch container                                     │   │
+│  │  □ Implement indexer script                                         │   │
+│  │  □ Set up file watcher                                              │   │
+│  │  □ Configure auditd                                                 │   │
 │  │  □ fluent-bit → GCP Logging                                         │   │
-│  │  □ Backup-Skripte erstellen                                         │   │
+│  │  □ Create backup scripts                                            │   │
 │  └─────────────────────────────────────────────────────────────────────┘   │
 │                                                                             │
-│  PHASE 3: USER SETUP (Woche 3-4)                                           │
+│  PHASE 3: USER SETUP (Week 3-4)                                            │
 │  ════════════════════════════════                                          │
 │  ┌─────────────────────────────────────────────────────────────────────┐   │
-│  │  □ Linux User für alle Teammitglieder                               │   │
-│  │  □ SSH Keys konfigurieren                                           │   │
-│  │  □ Gruppen und Berechtigungen                                       │   │
-│  │  □ CODEOWNERS Datei erstellen                                       │   │
-│  │  □ Pre-commit Hooks implementieren                                  │   │
-│  │  □ File Locking Script                                              │   │
+│  │  □ Linux users for all team members                                 │   │
+│  │  □ Configure SSH keys                                               │   │
+│  │  □ Groups and permissions                                           │   │
+│  │  □ Create CODEOWNERS file                                           │   │
+│  │  □ Implement pre-commit hooks                                       │   │
+│  │  □ File locking script                                              │   │
 │  └─────────────────────────────────────────────────────────────────────┘   │
 │                                                                             │
-│  PHASE 4: CLIENT SETUP (Woche 4)                                           │
+│  PHASE 4: CLIENT SETUP (Week 4)                                            │
 │  ═══════════════════════════════                                           │
 │  ┌─────────────────────────────────────────────────────────────────────┐   │
-│  │  □ Onboarding-Skript erstellen                                      │   │
-│  │  □ Obsidian Git Plugin Anleitung                                    │   │
-│  │  □ SSH Config Templates                                             │   │
-│  │  □ CLI Tools (kb search, etc.)                                      │   │
-│  │  □ AGENTS.md für LLM-Integration                                    │   │
+│  │  □ Create onboarding script                                         │   │
+│  │  □ Obsidian Git Plugin guide                                        │   │
+│  │  □ SSH config templates                                             │   │
+│  │  □ CLI tools (kb search, etc.)                                      │   │
+│  │  □ AGENTS.md for LLM integration                                    │   │
 │  └─────────────────────────────────────────────────────────────────────┘   │
 │                                                                             │
-│  PHASE 5: MONITORING & DOCS (Woche 5)                                      │
+│  PHASE 5: MONITORING & DOCS (Week 5)                                       │
 │  ═════════════════════════════════════                                     │
 │  ┌─────────────────────────────────────────────────────────────────────┐   │
-│  │  □ GCP Monitoring Dashboards                                        │   │
-│  │  □ Alerting (Slack Integration)                                     │   │
-│  │  □ Health Check Skripte                                             │   │
-│  │  □ Runbooks für Incidents                                           │   │
-│  │  □ Team-Schulung                                                    │   │
+│  │  □ GCP Monitoring dashboards                                        │   │
+│  │  □ Alerting (Slack integration)                                     │   │
+│  │  □ Health check scripts                                             │   │
+│  │  □ Runbooks for incidents                                           │   │
+│  │  □ Team training                                                    │   │
 │  └─────────────────────────────────────────────────────────────────────┘   │
 │                                                                             │
-│  PHASE 6: MIGRATION & GO-LIVE (Woche 6)                                    │
+│  PHASE 6: MIGRATION & GO-LIVE (Week 6)                                     │
 │  ═══════════════════════════════════════                                   │
 │  ┌─────────────────────────────────────────────────────────────────────┐   │
-│  │  □ Bestehende Docs migrieren                                        │   │
-│  │  □ Frontmatter zu allen Docs hinzufügen                             │   │
-│  │  □ Vollständige Indexierung                                         │   │
-│  │  □ Go-Live Announcement                                             │   │
-│  │  □ Feedback sammeln                                                 │   │
+│  │  □ Migrate existing docs                                            │   │
+│  │  □ Add frontmatter to all docs                                      │   │
+│  │  □ Complete indexing                                                │   │
+│  │  □ Go-live announcement                                             │   │
+│  │  □ Collect feedback                                                 │   │
 │  └─────────────────────────────────────────────────────────────────────┘   │
 │                                                                             │
 └─────────────────────────────────────────────────────────────────────────────┘
@@ -778,63 +779,63 @@ Dieses Dokument beschreibt die Gesamtarchitektur der TeamOS Knowledge Platform -
 
 ---
 
-## 11. Risiken und Mitigationen
+## 11. Risks and Mitigations
 
-| Risiko | Wahrscheinlichkeit | Auswirkung | Mitigation |
+| Risk | Probability | Impact | Mitigation |
 |--------|-------------------|------------|------------|
-| Datenverlust | Niedrig | Hoch | Git + Daily Snapshots + GitHub |
-| Server-Ausfall | Niedrig | Mittel | GCP SLA, lokale Git-Kopien |
-| Merge-Konflikte | Mittel | Niedrig | Ownership-Modell, File Locking |
-| Performance-Probleme | Niedrig | Mittel | Monitoring, Skalierung möglich |
-| Sicherheitsvorfall | Niedrig | Hoch | Audit, Immutable Logs, Alerting |
-| Adoption-Probleme | Mittel | Mittel | Schulung, einfaches Onboarding |
+| Data loss | Low | High | Git + Daily Snapshots + GitHub |
+| Server outage | Low | Medium | GCP SLA, local Git copies |
+| Merge conflicts | Medium | Low | Ownership model, file locking |
+| Performance issues | Low | Medium | Monitoring, scaling possible |
+| Security incident | Low | High | Audit, immutable logs, alerting |
+| Adoption problems | Medium | Medium | Training, simple onboarding |
 
 ---
 
-## 12. Erfolgskriterien
+## 12. Success Criteria
 
-| Metrik | Ziel | Messung |
+| Metric | Target | Measurement |
 |--------|------|---------|
-| Suchlatenz | <100ms | MeiliSearch Metriken |
-| Dokument-Auffindbarkeit | >90% in <30s | User-Feedback |
-| Sync-Latenz | <10 Min | Git Push → Server Pull |
+| Search latency | <100ms | MeiliSearch metrics |
+| Document findability | >90% in <30s | User feedback |
+| Sync latency | <10 min | Git Push → Server Pull |
 | Uptime | >99.5% | GCP Monitoring |
-| Adoption | 100% Team | Nutzungsstatistiken |
-| Konflikte pro Woche | <3 | Git Merge-Statistiken |
+| Adoption | 100% Team | Usage statistics |
+| Conflicts per week | <3 | Git merge statistics |
 
 ---
 
-## 13. Zusammenfassung
+## 13. Summary
 
-Die TeamOS Knowledge Platform bietet:
+The TeamOS Knowledge Platform provides:
 
-- **Unified Knowledge Store**: Markdown-basiert, Git-versioniert
-- **Schnelle Suche**: MeiliSearch mit <50ms Latenz
-- **Flexible Zugänge**: CLI (SSH) und GUI (Obsidian)
-- **Vollständiges Audit**: Alle Aktionen nachvollziehbar
-- **Konflikt-Management**: Ownership + Locking + Git
-- **Kosteneffizient**: ~$15-20 pro Person/Monat
+- **Unified Knowledge Store**: Markdown-based, Git-versioned
+- **Fast Search**: MeiliSearch with <50ms latency
+- **Flexible Access**: CLI (SSH) and GUI (Obsidian)
+- **Complete Audit**: All actions traceable
+- **Conflict Management**: Ownership + Locking + Git
+- **Cost Effective**: ~$15-20 per person/month
 
-Die Architektur ist modular aufgebaut und kann bei Bedarf erweitert werden (z.B. Semantic Search, CouchDB für Real-time Sync).
+The architecture is modular and can be extended as needed (e.g., Semantic Search, CouchDB for real-time sync).
 
 ---
 
-## Anhang A: Referenzen zu anderen Konzeptpapieren
+## Appendix A: References to Other Concept Papers
 
-| Dokument | Thema |
+| Document | Topic |
 |----------|-------|
-| 01-knowledge-base-document-search.md | Knowledge Base & Suche |
+| 01-knowledge-base-document-search.md | Knowledge Base & Search |
 | 02-server-setup-audit-monitoring.md | Server, Audit, Monitoring |
-| 03-obsidian-remote-access.md | Client-Zugang |
-| 04-conflict-handling.md | Konflikt-Management |
+| 03-obsidian-remote-access.md | Client Access |
+| 04-conflict-handling.md | Conflict Management |
 
 ---
 
-## Anhang B: Technologie-Stack Zusammenfassung
+## Appendix B: Technology Stack Summary
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                           TECHNOLOGIE-STACK                                 │
+│                           TECHNOLOGY STACK                                  │
 │                                                                             │
 │  INFRASTRUCTURE                                                             │
 │  ├── Cloud: Google Cloud Platform                                          │
@@ -866,3 +867,11 @@ Die Architektur ist modular aufgebaut und kann bei Bedarf erweitert werden (z.B.
 │                                                                             │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
+
+---
+
+## Related Documents
+
+- [[00-vision]]
+- [[01-knowledge-base-document-search]]
+- [[08-hybrid-search-vector-database]]

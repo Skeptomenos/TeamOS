@@ -1,82 +1,82 @@
-# Konzeptpapier: Konflikt-Handling und Lösungsstrategien
+# Concept Paper: Conflict Handling and Resolution Strategies
 
-**Version:** 1.0  
-**Datum:** 2025-01-10  
-**Status:** Entwurf  
-**Autor:** IT Architecture Team
+**Version:** 1.1  
+**Date:** 2025-01-11  
+**Status:** Implemented  
+**Author:** TeamOS
 
 ---
 
 ## 1. Executive Summary
 
-Dieses Dokument analysiert die verschiedenen Arten von Konflikten, die bei der gemeinsamen Nutzung einer Knowledge Base auftreten können, und präsentiert Strategien zu deren Vermeidung und Lösung. Der Fokus liegt auf praktikablen Lösungen für ein Team von 10 Personen, die sowohl mit CLI-Tools (OpenCode, Gemini CLI) als auch mit GUI-Tools (Obsidian) arbeiten.
+This document analyzes the various types of conflicts that can occur when collaboratively using a Knowledge Base and presents strategies for preventing and resolving them. The focus is on practical solutions for a team of 10 people who work with both CLI tools (OpenCode, Gemini CLI) and GUI tools (Obsidian).
 
 ---
 
-## 2. Konflikt-Taxonomie
+## 2. Conflict Taxonomy
 
-### 2.1 Arten von Konflikten
+### 2.1 Types of Conflicts
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                    Konflikt-Arten                               │
+│                    Conflict Types                               │
 │                                                                 │
 │  ┌─────────────────────────────────────────────────────────┐   │
-│  │  1. WRITE-WRITE KONFLIKT                                 │   │
-│  │     Zwei Personen bearbeiten dieselbe Datei gleichzeitig │   │
-│  │     → Änderungen überschreiben sich                      │   │
+│  │  1. WRITE-WRITE CONFLICT                                │   │
+│  │     Two people edit the same file simultaneously        │   │
+│  │     → Changes overwrite each other                      │   │
 │  └─────────────────────────────────────────────────────────┘   │
 │                                                                 │
 │  ┌─────────────────────────────────────────────────────────┐   │
-│  │  2. READ-WRITE KONFLIKT                                  │   │
-│  │     Person A liest Datei, Person B ändert sie           │   │
-│  │     → Person A arbeitet mit veralteten Daten            │   │
+│  │  2. READ-WRITE CONFLICT                                 │   │
+│  │     Person A reads file, Person B modifies it           │   │
+│  │     → Person A works with outdated data                 │   │
 │  └─────────────────────────────────────────────────────────┘   │
 │                                                                 │
 │  ┌─────────────────────────────────────────────────────────┐   │
-│  │  3. STRUKTURKONFLIKT                                     │   │
-│  │     Datei wird verschoben/umbenannt während bearbeitet  │   │
-│  │     → Verwaiste Änderungen, doppelte Dateien            │   │
+│  │  3. STRUCTURAL CONFLICT                                 │   │
+│  │     File is moved/renamed while being edited            │   │
+│  │     → Orphaned changes, duplicate files                 │   │
 │  └─────────────────────────────────────────────────────────┘   │
 │                                                                 │
 │  ┌─────────────────────────────────────────────────────────┐   │
-│  │  4. SEMANTISCHER KONFLIKT                                │   │
-│  │     Änderungen sind syntaktisch kompatibel, aber        │   │
-│  │     inhaltlich widersprüchlich                          │   │
-│  │     → Inkonsistente Dokumentation                       │   │
+│  │  4. SEMANTIC CONFLICT                                   │   │
+│  │     Changes are syntactically compatible, but           │   │
+│  │     content is contradictory                            │   │
+│  │     → Inconsistent documentation                        │   │
 │  └─────────────────────────────────────────────────────────┘   │
 │                                                                 │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-### 2.2 Konflikt-Wahrscheinlichkeit
+### 2.2 Conflict Probability
 
-| Szenario | Wahrscheinlichkeit | Auswirkung |
-|----------|-------------------|------------|
-| Zwei Personen bearbeiten dieselbe Datei | Mittel | Hoch |
-| LLM und Mensch bearbeiten gleichzeitig | Hoch | Mittel |
-| Strukturänderungen während Bearbeitung | Niedrig | Hoch |
-| Semantische Widersprüche | Mittel | Mittel |
+| Scenario | Probability | Impact |
+|----------|-------------|--------|
+| Two people edit the same file | Medium | High |
+| LLM and human edit simultaneously | High | Medium |
+| Structural changes during editing | Low | High |
+| Semantic contradictions | Medium | Medium |
 
 ---
 
-## 3. Konflikt-Vermeidungsstrategien
+## 3. Conflict Prevention Strategies
 
-### 3.1 Strategie 1: File Locking (Pessimistisch)
+### 3.1 Strategy 1: File Locking (Pessimistic)
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │                    File Locking                                 │
 │                                                                 │
-│  Zeitpunkt t=0:                                                │
+│  Time t=0:                                                      │
 │  ┌─────────────┐                    ┌─────────────┐            │
 │  │   User A    │                    │   User B    │            │
-│  │  will edit  │                    │  will edit  │            │
+│  │  wants edit │                    │  wants edit │            │
 │  └──────┬──────┘                    └──────┬──────┘            │
 │         │                                  │                    │
 │         ▼                                  │                    │
 │  ┌─────────────┐                           │                    │
-│  │ doc.md.lock │ ← Lock erstellt           │                    │
+│  │ doc.md.lock │ ← Lock created            │                    │
 │  │ "user_a"    │                           │                    │
 │  └─────────────┘                           │                    │
 │         │                                  ▼                    │
@@ -92,20 +92,20 @@ Dieses Dokument analysiert die verschiedenen Arten von Konflikten, die bei der g
 │         │                                                       │
 │         ▼                                                       │
 │  ┌─────────────┐                                               │
-│  │ Lock removed│ → User B kann jetzt bearbeiten               │
+│  │ Lock removed│ → User B can now edit                         │
 │  └─────────────┘                                               │
 │                                                                 │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-#### Implementierung
+#### Implementation
 
 ```bash
 #!/bin/bash
 # /usr/local/bin/kb-lock
 
 KNOWLEDGE_DIR="/shared/knowledge"
-LOCK_TIMEOUT=3600  # 1 Stunde
+LOCK_TIMEOUT=3600  # 1 hour
 
 lock_file() {
     local file="$1"
@@ -113,7 +113,7 @@ lock_file() {
     local user="${USER_EMAIL:-$USER}"
     local timestamp=$(date +%s)
     
-    # Prüfe ob Lock existiert
+    # Check if lock exists
     if [ -f "$lockfile" ]; then
         local lock_info=$(cat "$lockfile")
         local lock_user=$(echo "$lock_info" | cut -d'|' -f1)
@@ -121,7 +121,7 @@ lock_file() {
         local current_time=$(date +%s)
         local age=$((current_time - lock_time))
         
-        # Lock abgelaufen?
+        # Lock expired?
         if [ $age -gt $LOCK_TIMEOUT ]; then
             echo "Stale lock removed (was held by $lock_user)"
             rm -f "$lockfile"
@@ -132,7 +132,7 @@ lock_file() {
         fi
     fi
     
-    # Lock erstellen
+    # Create lock
     echo "${user}|${timestamp}" > "$lockfile"
     echo "Lock acquired for $file"
     return 0
@@ -173,7 +173,7 @@ case "$1" in
 esac
 ```
 
-#### LLM-Integration (AGENTS.md)
+#### LLM Integration (AGENTS.md)
 
 ```markdown
 ## File Locking Protocol for AI Agents
@@ -204,24 +204,24 @@ When editing files in /shared/knowledge/:
 5. **On error/crash**: Locks expire after 1 hour automatically
 ```
 
-#### Bewertung
+#### Evaluation
 
-| Aspekt | Bewertung |
-|--------|-----------|
-| Konflikt-Vermeidung | ⭐⭐⭐⭐⭐ |
-| Benutzerfreundlichkeit | ⭐⭐⭐ |
-| Parallelität | ⭐⭐ |
-| Implementierungsaufwand | ⭐⭐⭐⭐ |
+| Aspect | Rating |
+|--------|--------|
+| Conflict Prevention | ⭐⭐⭐⭐⭐ |
+| User-friendliness | ⭐⭐⭐ |
+| Parallelism | ⭐⭐ |
+| Implementation Effort | ⭐⭐⭐⭐ |
 
 ---
 
-### 3.2 Strategie 2: Optimistic Locking (Git-basiert)
+### 3.2 Strategy 2: Optimistic Locking (Git-based)
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │                    Optimistic Locking                           │
 │                                                                 │
-│  Zeitpunkt t=0:                                                │
+│  Time t=0:                                                      │
 │  ┌─────────────┐                    ┌─────────────┐            │
 │  │   User A    │                    │   User B    │            │
 │  │  git pull   │                    │  git pull   │            │
@@ -231,7 +231,7 @@ When editing files in /shared/knowledge/:
 │         ▼                                  ▼                    │
 │  ┌─────────────┐                    ┌─────────────┐            │
 │  │   EDITING   │                    │   EDITING   │            │
-│  │   (lokal)   │                    │   (lokal)   │            │
+│  │   (local)   │                    │   (local)   │            │
 │  └──────┬──────┘                    └──────┬──────┘            │
 │         │                                  │                    │
 │         ▼                                  │                    │
@@ -260,38 +260,38 @@ When editing files in /shared/knowledge/:
 #### Workflow
 
 ```bash
-# Vor dem Bearbeiten
+# Before editing
 git pull --rebase
 
-# Nach dem Bearbeiten
+# After editing
 git add -A
 git commit -m "Update: description"
 git push
 
-# Bei Konflikt
+# On conflict
 git pull --rebase
-# Konflikte lösen
+# Resolve conflicts
 git add -A
 git rebase --continue
 git push
 ```
 
-#### Bewertung
+#### Evaluation
 
-| Aspekt | Bewertung |
-|--------|-----------|
-| Konflikt-Vermeidung | ⭐⭐⭐ |
-| Benutzerfreundlichkeit | ⭐⭐⭐⭐ |
-| Parallelität | ⭐⭐⭐⭐⭐ |
-| Implementierungsaufwand | ⭐⭐⭐⭐⭐ |
+| Aspect | Rating |
+|--------|--------|
+| Conflict Prevention | ⭐⭐⭐ |
+| User-friendliness | ⭐⭐⭐⭐ |
+| Parallelism | ⭐⭐⭐⭐⭐ |
+| Implementation Effort | ⭐⭐⭐⭐⭐ |
 
 ---
 
-### 3.3 Strategie 3: Ownership-Modell
+### 3.3 Strategy 3: Ownership Model
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                    Ownership-Modell                             │
+│                    Ownership Model                              │
 │                                                                 │
 │  /shared/knowledge/                                            │
 │  ├── api-docs/                                                 │
@@ -302,15 +302,15 @@ git push
 │  │   └── incident-response/ ← Owner: ops-team                 │
 │  └── decisions/             ← Owner: architecture-team        │
 │                                                                 │
-│  Regeln:                                                       │
-│  - Nur Owner darf Dateien in seinem Bereich ÄNDERN            │
-│  - Alle dürfen LESEN                                           │
-│  - Änderungsvorschläge via Pull Request                        │
+│  Rules:                                                        │
+│  - Only owner may MODIFY files in their area                   │
+│  - Everyone may READ                                           │
+│  - Change proposals via Pull Request                           │
 │                                                                 │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-#### Implementierung via CODEOWNERS
+#### Implementation via CODEOWNERS
 
 ```
 # /shared/knowledge/.github/CODEOWNERS
@@ -326,87 +326,87 @@ git push
 # Decisions
 /decisions/                  @architecture-team
 
-# Default: Alle können vorschlagen, Review erforderlich
+# Default: Everyone can propose, review required
 *                            @knowledge-admins
 ```
 
-#### Bewertung
+#### Evaluation
 
-| Aspekt | Bewertung |
-|--------|-----------|
-| Konflikt-Vermeidung | ⭐⭐⭐⭐⭐ |
-| Benutzerfreundlichkeit | ⭐⭐⭐ |
-| Parallelität | ⭐⭐⭐⭐ |
-| Implementierungsaufwand | ⭐⭐⭐ |
+| Aspect | Rating |
+|--------|--------|
+| Conflict Prevention | ⭐⭐⭐⭐⭐ |
+| User-friendliness | ⭐⭐⭐ |
+| Parallelism | ⭐⭐⭐⭐ |
+| Implementation Effort | ⭐⭐⭐ |
 
 ---
 
-### 3.4 Strategie 4: CRDT-basierte Synchronisation
+### 3.4 Strategy 4: CRDT-based Synchronization
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │                    CRDT (Conflict-free Replicated Data Types)   │
 │                                                                 │
-│  Prinzip: Änderungen werden als Operationen gespeichert,       │
-│           nicht als Zustände. Operationen sind kommutativ.     │
+│  Principle: Changes are stored as operations,                  │
+│             not states. Operations are commutative.            │
 │                                                                 │
-│  User A: "Füge 'Hello' an Position 0 ein"                      │
-│  User B: "Füge 'World' an Position 0 ein"                      │
+│  User A: "Insert 'Hello' at position 0"                        │
+│  User B: "Insert 'World' at position 0"                        │
 │                                                                 │
-│  Ergebnis (deterministisch): "HelloWorld" oder "WorldHello"    │
-│  (basierend auf Timestamp/User-ID)                             │
+│  Result (deterministic): "HelloWorld" or "WorldHello"          │
+│  (based on Timestamp/User-ID)                                  │
 │                                                                 │
-│  Implementierung: Obsidian Livesync (CouchDB)                  │
+│  Implementation: Obsidian Livesync (CouchDB)                   │
 │                                                                 │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-#### Bewertung
+#### Evaluation
 
-| Aspekt | Bewertung |
-|--------|-----------|
-| Konflikt-Vermeidung | ⭐⭐⭐⭐⭐ |
-| Benutzerfreundlichkeit | ⭐⭐⭐⭐⭐ |
-| Parallelität | ⭐⭐⭐⭐⭐ |
-| Implementierungsaufwand | ⭐⭐ |
+| Aspect | Rating |
+|--------|--------|
+| Conflict Prevention | ⭐⭐⭐⭐⭐ |
+| User-friendliness | ⭐⭐⭐⭐⭐ |
+| Parallelism | ⭐⭐⭐⭐⭐ |
+| Implementation Effort | ⭐⭐ |
 
 ---
 
-## 4. Konflikt-Lösungsstrategien
+## 4. Conflict Resolution Strategies
 
-### 4.1 Git Merge-Konflikte lösen
+### 4.1 Resolving Git Merge Conflicts
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                    Git Merge-Konflikt                           │
+│                    Git Merge Conflict                           │
 │                                                                 │
 │  <<<<<<< HEAD                                                  │
-│  Die API unterstützt OAuth 2.0 mit PKCE.                       │
+│  The API supports OAuth 2.0 with PKCE.                         │
 │  =======                                                        │
-│  Die API unterstützt OAuth 2.0 mit Client Credentials.         │
+│  The API supports OAuth 2.0 with Client Credentials.           │
 │  >>>>>>> feature-branch                                         │
 │                                                                 │
-│  Lösungsoptionen:                                              │
-│  1. Manuell: Beide Versionen prüfen, beste wählen              │
+│  Resolution options:                                           │
+│  1. Manual: Review both versions, choose best                  │
 │  2. Theirs: git checkout --theirs file.md                      │
 │  3. Ours: git checkout --ours file.md                          │
-│  4. Merge: Beide Informationen kombinieren                     │
+│  4. Merge: Combine information from both                       │
 │                                                                 │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-#### Merge-Tool Konfiguration
+#### Merge Tool Configuration
 
 ```bash
-# Git Merge-Tool konfigurieren
+# Configure Git merge tool
 git config --global merge.tool vscode
 git config --global mergetool.vscode.cmd 'code --wait $MERGED'
 
-# Bei Konflikt
+# On conflict
 git mergetool
 ```
 
-#### LLM-gestütztes Merge
+#### LLM-assisted Merge
 
 ```python
 #!/usr/bin/env python3
@@ -418,7 +418,7 @@ import subprocess
 import openai
 
 def get_conflict_content(file_path: str) -> tuple:
-    """Extrahiert die beiden Versionen aus einem Konflikt"""
+    """Extracts both versions from a conflict"""
     with open(file_path, 'r') as f:
         content = f.read()
     
@@ -444,27 +444,27 @@ def get_conflict_content(file_path: str) -> tuple:
     return '\n'.join(ours), '\n'.join(theirs)
 
 def resolve_with_llm(ours: str, theirs: str, context: str) -> str:
-    """Nutzt LLM um Konflikt zu lösen"""
+    """Uses LLM to resolve conflict"""
     prompt = f"""
-    Du bist ein technischer Dokumentations-Experte.
+    You are a technical documentation expert.
     
-    Es gibt einen Merge-Konflikt in einer Markdown-Datei.
+    There is a merge conflict in a Markdown file.
     
-    VERSION A (aktuell):
+    VERSION A (current):
     {ours}
     
-    VERSION B (eingehend):
+    VERSION B (incoming):
     {theirs}
     
-    KONTEXT:
+    CONTEXT:
     {context}
     
-    Bitte erstelle eine zusammengeführte Version, die:
-    1. Alle korrekten Informationen aus beiden Versionen enthält
-    2. Widersprüche auflöst (bevorzuge die aktuellere/korrektere Info)
-    3. Gut formatiert ist
+    Please create a merged version that:
+    1. Contains all correct information from both versions
+    2. Resolves contradictions (prefer the more current/correct info)
+    3. Is well formatted
     
-    Antworte NUR mit dem zusammengeführten Text, keine Erklärungen.
+    Respond ONLY with the merged text, no explanations.
     """
     
     response = openai.chat.completions.create(
@@ -480,45 +480,45 @@ if __name__ == '__main__':
     
     ours, theirs = get_conflict_content(file_path)
     
-    # Kontext aus Dateiname/Pfad
-    context = f"Datei: {file_path}"
+    # Context from filename/path
+    context = f"File: {file_path}"
     
     resolved = resolve_with_llm(ours, theirs, context)
     
-    print("Vorgeschlagene Lösung:")
+    print("Proposed solution:")
     print("-" * 40)
     print(resolved)
     print("-" * 40)
     
-    confirm = input("Übernehmen? (y/n): ")
+    confirm = input("Apply? (y/n): ")
     if confirm.lower() == 'y':
         with open(file_path, 'w') as f:
             f.write(resolved)
-        print(f"Konflikt in {file_path} gelöst")
+        print(f"Conflict in {file_path} resolved")
 ```
 
 ---
 
-### 4.2 Syncthing Konflikt-Dateien
+### 4.2 Syncthing Conflict Files
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                    Syncthing Konflikte                          │
+│                    Syncthing Conflicts                          │
 │                                                                 │
-│  Bei Konflikt erstellt Syncthing:                              │
+│  On conflict, Syncthing creates:                               │
 │                                                                 │
-│  document.md                    ← Gewinner (neueste Änderung)  │
-│  document.sync-conflict-20250110-143022-ABCDEF.md  ← Verlierer │
+│  document.md                    ← Winner (newest change)       │
+│  document.sync-conflict-20250110-143022-ABCDEF.md  ← Loser     │
 │                                                                 │
-│  Lösung:                                                       │
-│  1. Beide Dateien vergleichen                                  │
-│  2. Manuell zusammenführen                                     │
-│  3. Konflikt-Datei löschen                                     │
+│  Resolution:                                                   │
+│  1. Compare both files                                         │
+│  2. Manually merge                                             │
+│  3. Delete conflict file                                       │
 │                                                                 │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-#### Konflikt-Finder Script
+#### Conflict Finder Script
 
 ```bash
 #!/bin/bash
@@ -526,11 +526,11 @@ if __name__ == '__main__':
 
 KNOWLEDGE_DIR="/shared/knowledge"
 
-echo "=== Syncthing Konflikte ==="
+echo "=== Syncthing Conflicts ==="
 find "$KNOWLEDGE_DIR" -name "*.sync-conflict-*" -type f
 
 echo ""
-echo "=== Git Konflikte ==="
+echo "=== Git Conflicts ==="
 cd "$KNOWLEDGE_DIR"
 git diff --name-only --diff-filter=U
 
@@ -547,110 +547,110 @@ find "$KNOWLEDGE_DIR" -name "*.lock" -mmin +60 -type f
 ┌─────────────────────────────────────────────────────────────────┐
 │                    Last-Write-Wins Problem                      │
 │                                                                 │
-│  t=0: User A öffnet doc.md (Version 1)                         │
-│  t=1: User B öffnet doc.md (Version 1)                         │
-│  t=2: User A speichert (Version 2)                             │
-│  t=3: User B speichert (Version 3) ← User A's Änderungen WEG!  │
+│  t=0: User A opens doc.md (Version 1)                          │
+│  t=1: User B opens doc.md (Version 1)                          │
+│  t=2: User A saves (Version 2)                                 │
+│  t=3: User B saves (Version 3) ← User A's changes GONE!        │
 │                                                                 │
-│  SSHFS hat KEIN Konflikt-Handling!                             │
+│  SSHFS has NO conflict handling!                               │
 │                                                                 │
 │  Mitigation:                                                   │
-│  - File Locking verwenden                                      │
-│  - Oder: SSHFS nur für Read-Only Zugang                        │
+│  - Use File Locking                                            │
+│  - Or: Use SSHFS for read-only access only                     │
 │                                                                 │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 5. Empfohlene Strategie
+## 5. Recommended Strategy
 
-### 5.1 Hybrid-Ansatz
+### 5.1 Hybrid Approach
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                    Empfohlener Hybrid-Ansatz                    │
+│                    Recommended Hybrid Approach                  │
 │                                                                 │
 │  ┌─────────────────────────────────────────────────────────┐   │
-│  │  EBENE 1: Ownership (Vermeidung)                        │   │
-│  │  - Klare Zuständigkeiten pro Bereich                    │   │
-│  │  - Reduziert Konflikt-Wahrscheinlichkeit um 80%         │   │
+│  │  LAYER 1: Ownership (Prevention)                        │   │
+│  │  - Clear responsibilities per area                      │   │
+│  │  - Reduces conflict probability by 80%                  │   │
 │  └─────────────────────────────────────────────────────────┘   │
 │                            │                                    │
 │                            ▼                                    │
 │  ┌─────────────────────────────────────────────────────────┐   │
-│  │  EBENE 2: Git-basiertes Optimistic Locking              │   │
-│  │  - Paralleles Arbeiten möglich                          │   │
-│  │  - Konflikte werden beim Push erkannt                   │   │
+│  │  LAYER 2: Git-based Optimistic Locking                  │   │
+│  │  - Parallel work possible                               │   │
+│  │  - Conflicts detected on push                           │   │
 │  └─────────────────────────────────────────────────────────┘   │
 │                            │                                    │
 │                            ▼                                    │
 │  ┌─────────────────────────────────────────────────────────┐   │
-│  │  EBENE 3: File Locking für kritische Dokumente          │   │
-│  │  - Nur für häufig bearbeitete Shared-Dokumente          │   │
-│  │  - LLM-Agents nutzen immer Locking                      │   │
+│  │  LAYER 3: File Locking for critical documents           │   │
+│  │  - Only for frequently edited shared documents          │   │
+│  │  - LLM agents always use locking                        │   │
 │  └─────────────────────────────────────────────────────────┘   │
 │                            │                                    │
 │                            ▼                                    │
 │  ┌─────────────────────────────────────────────────────────┐   │
-│  │  EBENE 4: LLM-gestütztes Merge bei Konflikten           │   │
-│  │  - Automatische Vorschläge                              │   │
-│  │  - Menschliche Bestätigung                              │   │
+│  │  LAYER 4: LLM-assisted merge on conflicts               │   │
+│  │  - Automatic suggestions                                │   │
+│  │  - Human confirmation                                   │   │
 │  └─────────────────────────────────────────────────────────┘   │
 │                                                                 │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-### 5.2 Implementierungs-Checkliste
+### 5.2 Implementation Checklist
 
-| Komponente | Priorität | Status |
-|------------|-----------|--------|
-| Git-basierter Workflow | Hoch | [ ] |
-| CODEOWNERS für Ownership | Hoch | [ ] |
-| File Locking Script | Mittel | [ ] |
-| LLM-Merge-Tool | Niedrig | [ ] |
-| Konflikt-Finder Script | Mittel | [ ] |
-| Team-Schulung | Hoch | [ ] |
+| Component | Priority | Status |
+|-----------|----------|--------|
+| Git-based Workflow | High | [ ] |
+| CODEOWNERS for Ownership | High | [ ] |
+| File Locking Script | Medium | [ ] |
+| LLM Merge Tool | Low | [ ] |
+| Conflict Finder Script | Medium | [ ] |
+| Team Training | High | [ ] |
 
 ---
 
-## 6. Spezialfall: LLM-Agent Konflikte
+## 6. Special Case: LLM Agent Conflicts
 
 ### 6.1 Problem
 
-LLM-Agents (OpenCode, Gemini CLI) können sehr schnell viele Dateien bearbeiten, was zu Konflikten führt.
+LLM agents (OpenCode, Gemini CLI) can edit many files very quickly, which leads to conflicts.
 
-### 6.2 Lösung: Agent-Protokoll
+### 6.2 Solution: Agent Protocol
 
 ```markdown
 ## LLM Agent File Access Protocol
 
-### Vor jeder Dateiänderung:
+### Before each file change:
 
-1. **Lock prüfen**
+1. **Check lock**
    ```bash
    if kb-lock check "$FILE"; then
-       # Datei ist frei
+       # File is free
    else
-       # Warten und erneut versuchen
+       # Wait and retry
        sleep 30
-       # Datei neu lesen (könnte sich geändert haben)
+       # Re-read file (may have changed)
    fi
    ```
 
-2. **Lock erwerben**
+2. **Acquire lock**
    ```bash
    kb-lock lock "$FILE"
    ```
 
-3. **Datei lesen** (immer aktuellste Version)
+3. **Read file** (always get latest version)
    ```bash
    cat "$FILE"
    ```
 
-4. **Änderungen durchführen**
+4. **Make changes**
 
-5. **Lock freigeben**
+5. **Release lock**
    ```bash
    kb-lock unlock "$FILE"
    ```
@@ -662,15 +662,15 @@ LLM-Agents (OpenCode, Gemini CLI) können sehr schnell viele Dateien bearbeiten,
    git push || git pull --rebase && git push
    ```
 
-### Bei Konflikt:
+### On conflict:
 
-1. Änderungen NICHT überschreiben
-2. Konflikt-Datei erstellen: `$FILE.conflict.$TIMESTAMP`
-3. User benachrichtigen
-4. Auf manuelle Lösung warten
+1. Do NOT overwrite changes
+2. Create conflict file: `$FILE.conflict.$TIMESTAMP`
+3. Notify user
+4. Wait for manual resolution
 ```
 
-### 6.3 Konflikt-Benachrichtigung
+### 6.3 Conflict Notification
 
 ```bash
 #!/bin/bash
@@ -683,13 +683,13 @@ CONFLICT_TYPE="$3"
 # Slack Notification
 curl -X POST -H 'Content-type: application/json' \
     --data "{
-        \"text\": \"⚠️ Konflikt in Knowledge Base\",
+        \"text\": \"Warning: Conflict in Knowledge Base\",
         \"blocks\": [
             {
                 \"type\": \"section\",
                 \"text\": {
                     \"type\": \"mrkdwn\",
-                    \"text\": \"*Datei:* $FILE\n*Benutzer:* $USER\n*Typ:* $CONFLICT_TYPE\"
+                    \"text\": \"*File:* $FILE\n*User:* $USER\n*Type:* $CONFLICT_TYPE\"
                 }
             }
         ]
@@ -699,18 +699,18 @@ curl -X POST -H 'Content-type: application/json' \
 
 ---
 
-## 7. Monitoring & Metriken
+## 7. Monitoring & Metrics
 
-### 7.1 Zu überwachende Metriken
+### 7.1 Metrics to Monitor
 
-| Metrik | Schwellwert | Aktion |
-|--------|-------------|--------|
-| Konflikte pro Tag | >5 | Ownership-Struktur prüfen |
-| Stale Locks | >0 (älter als 1h) | Automatisch entfernen |
-| Merge-Konflikte | >3 pro Woche | Team-Kommunikation verbessern |
-| Konflikt-Dateien | >0 | Sofort lösen |
+| Metric | Threshold | Action |
+|--------|-----------|--------|
+| Conflicts per day | >5 | Review ownership structure |
+| Stale Locks | >0 (older than 1h) | Remove automatically |
+| Merge conflicts | >3 per week | Improve team communication |
+| Conflict files | >0 | Resolve immediately |
 
-### 7.2 Dashboard-Script
+### 7.2 Dashboard Script
 
 ```bash
 #!/bin/bash
@@ -739,33 +739,33 @@ git log --oneline --grep="conflict" --since="7 days ago"
 
 ---
 
-## 8. Schulungsmaterial
+## 8. Training Material
 
 ### 8.1 Quick Reference Card
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                    KONFLIKT-HANDLING QUICK REFERENCE            │
+│                    CONFLICT HANDLING QUICK REFERENCE            │
 │                                                                 │
-│  VOR DEM BEARBEITEN:                                           │
+│  BEFORE EDITING:                                                │
 │  1. git pull                                                   │
-│  2. kb-lock check <datei>                                      │
-│  3. kb-lock lock <datei>                                       │
+│  2. kb-lock check <file>                                       │
+│  3. kb-lock lock <file>                                        │
 │                                                                 │
-│  NACH DEM BEARBEITEN:                                          │
-│  1. kb-lock unlock <datei>                                     │
+│  AFTER EDITING:                                                 │
+│  1. kb-lock unlock <file>                                      │
 │  2. git add -A                                                 │
-│  3. git commit -m "Beschreibung"                               │
+│  3. git commit -m "Description"                                │
 │  4. git push                                                   │
 │                                                                 │
-│  BEI KONFLIKT:                                                 │
+│  ON CONFLICT:                                                  │
 │  1. git pull --rebase                                          │
-│  2. Konflikte in Editor lösen                                  │
-│  3. git add <datei>                                            │
+│  2. Resolve conflicts in editor                                │
+│  3. git add <file>                                             │
 │  4. git rebase --continue                                      │
 │  5. git push                                                   │
 │                                                                 │
-│  HILFE:                                                        │
+│  HELP:                                                         │
 │  - find-conflicts.sh                                           │
 │  - conflict-dashboard.sh                                       │
 │  - #knowledge-base Slack Channel                               │
@@ -775,31 +775,39 @@ git log --oneline --grep="conflict" --since="7 days ago"
 
 ---
 
-## 9. Zusammenfassung
+## 9. Summary
 
-### Empfohlene Strategie
+### Recommended Strategy
 
-| Situation | Strategie |
-|-----------|-----------|
-| Normale Bearbeitung | Git + Optimistic Locking |
-| Kritische Dokumente | File Locking |
-| LLM-Agents | Immer File Locking |
-| Konflikt aufgetreten | LLM-gestütztes Merge |
-| Häufige Konflikte | Ownership-Modell einführen |
+| Situation | Strategy |
+|-----------|----------|
+| Normal editing | Git + Optimistic Locking |
+| Critical documents | File Locking |
+| LLM Agents | Always File Locking |
+| Conflict occurred | LLM-assisted Merge |
+| Frequent conflicts | Implement Ownership Model |
 
-### Nächste Schritte
+### Next Steps
 
-1. [ ] File Locking Script implementieren
-2. [ ] CODEOWNERS Datei erstellen
-3. [ ] Team über Workflow schulen
-4. [ ] Monitoring einrichten
-5. [ ] LLM-Merge-Tool evaluieren
+1. [ ] Implement File Locking script
+2. [ ] Create CODEOWNERS file
+3. [ ] Train team on workflow
+4. [ ] Set up monitoring
+5. [ ] Evaluate LLM Merge tool
 
 ---
 
-## Anhang A: Referenzen
+## Appendix A: References
 
 - [Git Merge Strategies](https://git-scm.com/docs/merge-strategies)
 - [CRDT Explained](https://crdt.tech/)
 - [Obsidian Livesync](https://github.com/vrtmrz/obsidian-livesync)
 - [Syncthing Conflict Handling](https://docs.syncthing.net/users/syncing.html#conflicting-changes)
+
+---
+
+## Related Documents
+
+- [[00-vision]]
+- [[01-knowledge-base-document-search]]
+- [[05-overall-architecture]]

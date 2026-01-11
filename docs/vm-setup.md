@@ -606,6 +606,8 @@ docker exec -u git gitea gitea admin user change-password --username admin --pas
 
 The TeamOS Knowledge Base is a Git-versioned Markdown repository with full-text search via MeiliSearch.
 
+> **Planned Enhancement:** Hybrid search combining keyword (MeiliSearch) and semantic (Qdrant vector DB) search for improved AI agent experience. See [[concepts/08-hybrid-search-vector-database]] for design.
+
 | Property | Value |
 |----------|-------|
 | **Repository** | `knowledge-base` in Gitea |
