@@ -898,7 +898,7 @@ After=network.target docker.service
 [Service]
 Type=simple
 User=root
-ExecStart=/usr/bin/opencode serve --hostname 127.0.0.1 --port 4096
+ExecStart=/usr/bin/opencode serve --hostname 0.0.0.0 --port 4096
 Restart=always
 RestartSec=10
 Environment=HOME=/root
