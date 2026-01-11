@@ -23,7 +23,10 @@ provider "google" {
 resource "google_compute_network" "teamos_vpc" {
   name                    = "teamos-vpc"
   auto_create_subnetworks = true
-  description             = "TeamOS VPC network"
+
+  lifecycle {
+    ignore_changes = [description]
+  }
 }
 
 resource "google_compute_firewall" "allow_ssh" {
@@ -139,6 +142,7 @@ resource "google_compute_disk" "data_disk" {
 
   lifecycle {
     prevent_destroy = true
+    ignore_changes  = [labels, description]
   }
 }
 
@@ -147,9 +151,10 @@ resource "google_compute_disk" "data_disk" {
 # =============================================================================
 
 resource "google_compute_instance" "teamos_server" {
-  name         = "teamos-server"
-  machine_type = var.machine_type
-  zone         = var.zone
+  name                      = "teamos-server"
+  machine_type              = var.machine_type
+  zone                      = var.zone
+  allow_stopping_for_update = true
 
   tags = ["teamos-server"]
 
@@ -210,6 +215,7 @@ resource "google_compute_instance" "teamos_server" {
 # =============================================================================
 
 resource "google_compute_instance_iam_member" "os_login" {
+  count         = var.team_group_email != "identity-n-productivity@example.com" ? 1 : 0
   project       = var.project_id
   zone          = var.zone
   instance_name = google_compute_instance.teamos_server.name
