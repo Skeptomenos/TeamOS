@@ -394,6 +394,8 @@ We earn trust incrementally before the assistant takes consequential actions.
 - [[01-knowledge-base-document-search]] - Knowledge Base architecture
 - [[05-overall-architecture]] - System architecture overview
 - [[08-hybrid-search-vector-database]] - Hybrid search design
+- [[09-opencode-server-pomerium]] - Web access with Pomerium SSO
+- [[10-multi-client-architecture]] - iOS, Web, CLI entry points
 
 ---
 

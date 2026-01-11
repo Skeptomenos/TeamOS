@@ -1,6 +1,48 @@
-project_id       = "it-services-automations"
-region           = "europe-west1"
-zone             = "europe-west1-b"
-machine_type     = "e2-standard-4"
-data_disk_size   = 200
-team_group_email = "identity-n-productivity@example.com"
+# =============================================================================
+# TeamOS Terraform Configuration
+# =============================================================================
+#
+# Copy this file to terraform.tfvars and fill in the required values.
+#
+# BEFORE DEPLOYING:
+# 1. Create Google OAuth credentials at:
+#    https://console.cloud.google.com/apis/credentials?project=it-services-automations
+#
+# 2. For the OAuth redirect URI, you'll need the server IP first.
+#    Option A: Deploy once, get IP from output, update OAuth, redeploy
+#    Option B: Reserve a static IP first, use that
+#
+# =============================================================================
+
+# =============================================================================
+# REQUIRED
+# =============================================================================
+
+project_id = "it-services-automations"
+
+# Google OAuth credentials (create in GCP Console)
+# Application type: Web application
+# Authorized redirect URI: https://auth.<IP-with-dashes>.nip.io/oauth2/callback
+google_oauth_client_id     = ""
+google_oauth_client_secret = ""
+
+# Your Google Workspace domain (e.g., "company.com")
+# Only users with @this-domain.com emails can access
+allowed_domain = ""
+
+# Google Workspace group email for SSH access via OS Login
+team_group_email = ""
+
+# =============================================================================
+# OPTIONAL (sensible defaults provided)
+# =============================================================================
+
+region         = "europe-west1"
+zone           = "europe-west1-b"
+machine_type   = "e2-standard-4"
+data_disk_size = 200
+
+# Leave empty to auto-generate secure random keys
+# meili_master_key       = ""
+# pomerium_shared_secret = ""
+# pomerium_cookie_secret = ""

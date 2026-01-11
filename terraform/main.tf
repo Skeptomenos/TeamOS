@@ -54,6 +54,45 @@ resource "google_compute_firewall" "allow_gitea" {
   description   = "Allow Gitea web and SSH access"
 }
 
+resource "google_compute_firewall" "allow_https" {
+  name    = "teamos-allow-https"
+  network = google_compute_network.teamos_vpc.name
+
+  allow {
+    protocol = "tcp"
+    ports    = ["80", "443"]
+  }
+
+  source_ranges = ["0.0.0.0/0"]
+  target_tags   = ["teamos-server"]
+  description   = "Allow HTTP/HTTPS for Pomerium reverse proxy"
+}
+
+# =============================================================================
+# RANDOM SECRETS (auto-generated if not provided)
+# =============================================================================
+
+resource "random_password" "meili_master_key" {
+  length  = 32
+  special = false
+}
+
+resource "random_password" "pomerium_shared_secret" {
+  length  = 32
+  special = false
+}
+
+resource "random_password" "pomerium_cookie_secret" {
+  length  = 32
+  special = false
+}
+
+locals {
+  meili_master_key       = var.meili_master_key != "" ? var.meili_master_key : random_password.meili_master_key.result
+  pomerium_shared_secret = var.pomerium_shared_secret != "" ? var.pomerium_shared_secret : random_password.pomerium_shared_secret.result
+  pomerium_cookie_secret = var.pomerium_cookie_secret != "" ? var.pomerium_cookie_secret : random_password.pomerium_cookie_secret.result
+}
+
 # =============================================================================
 # SERVICE ACCOUNTS
 # =============================================================================
@@ -135,7 +174,13 @@ resource "google_compute_instance" "teamos_server" {
   }
 
   metadata = {
-    enable-oslogin = "TRUE"
+    enable-oslogin             = "TRUE"
+    teamos-oauth-client-id     = var.google_oauth_client_id
+    teamos-oauth-client-secret = var.google_oauth_client_secret
+    teamos-allowed-domain      = var.allowed_domain
+    teamos-meili-master-key    = local.meili_master_key
+    teamos-pomerium-shared     = local.pomerium_shared_secret
+    teamos-pomerium-cookie     = local.pomerium_cookie_secret
   }
 
   service_account {

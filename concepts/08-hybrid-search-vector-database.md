@@ -297,48 +297,54 @@ class Chunk:
 
 | Model | Dimensions | Speed | Quality | Cost |
 |-------|------------|-------|---------|------|
+| **Google text-embedding-005** | 768 | Fast | Best | $0.00002/1K chars |
+| Google text-embedding-004 | 768 | Fast | Good | $0.00002/1K chars |
 | OpenAI text-embedding-3-small | 1536 | Fast | Good | $0.02/1M tokens |
-| OpenAI text-embedding-3-large | 3072 | Fast | Best | $0.13/1M tokens |
 | Ollama nomic-embed-text | 768 | Local | Good | Free |
-| Ollama mxbai-embed-large | 1024 | Local | Better | Free |
 
-**Recommendation:** Start with `text-embedding-3-small` for simplicity. Migrate to local embeddings (Ollama) if cost becomes significant.
+**Decision:** Use **Google Vertex AI `text-embedding-005`** (textembedding-gecko).
+
+Rationale:
+- Company runs on GCP with full control (no permission needed)
+- Vertex AI already available in `it-services-automations` project
+- Native GCP integration, same billing
+- Excellent quality, competitive pricing
+- 768 dimensions = smaller vectors = faster search
 
 #### Embedding Pipeline
 
 ```python
-import openai
+from google.cloud import aiplatform
+from vertexai.language_models import TextEmbeddingModel
 from qdrant_client import QdrantClient
 from qdrant_client.models import PointStruct, VectorParams, Distance
 
 # Initialize clients
-openai_client = openai.OpenAI()
+aiplatform.init(project="it-services-automations", location="europe-west1")
+embedding_model = TextEmbeddingModel.from_pretrained("text-embedding-005")
 qdrant = QdrantClient(host="localhost", port=6333)
 
 # Create collection (once)
 qdrant.create_collection(
     collection_name="knowledge",
     vectors_config=VectorParams(
-        size=1536,  # text-embedding-3-small dimensions
+        size=768,  # text-embedding-005 dimensions
         distance=Distance.COSINE
     )
 )
 
 def embed_chunks(chunks: list[Chunk]) -> list[PointStruct]:
-    """Generate embeddings and prepare for Qdrant upsert."""
+    """Generate embeddings using Vertex AI and prepare for Qdrant upsert."""
     
-    # Batch embed for efficiency
+    # Batch embed for efficiency (max 250 texts per batch)
     texts = [chunk.text for chunk in chunks]
-    response = openai_client.embeddings.create(
-        model="text-embedding-3-small",
-        input=texts
-    )
+    embeddings = embedding_model.get_embeddings(texts)
     
     points = []
-    for i, (chunk, embedding_data) in enumerate(zip(chunks, response.data)):
+    for chunk, embedding in zip(chunks, embeddings):
         points.append(PointStruct(
             id=hash(chunk.id) % (2**63),  # Qdrant needs int IDs
-            vector=embedding_data.embedding,
+            vector=embedding.values,
             payload={
                 "chunk_id": chunk.id,
                 "text": chunk.text,
@@ -443,11 +449,9 @@ async def hybrid_search(
         List of SearchResult with chunks and metadata
     """
     
-    # 1. Embed the query
-    query_embedding = openai_client.embeddings.create(
-        model="text-embedding-3-small",
-        input=[query]
-    ).data[0].embedding
+    # 1. Embed the query using Vertex AI
+    query_embeddings = embedding_model.get_embeddings([query])
+    query_embedding = query_embeddings[0].values
     
     # 2. Search both engines in parallel
     keyword_task = search_meilisearch(query, limit=limit*2, category=category)
@@ -838,7 +842,7 @@ python3 /opt/teamos/bin/hybrid_indexer.py --full
 {
   "collection_name": "knowledge",
   "vectors": {
-    "size": 1536,
+    "size": 768,
     "distance": "Cosine"
   },
   "payload_schema": {

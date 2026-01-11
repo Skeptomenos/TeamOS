@@ -1,8 +1,39 @@
 # TeamOS Infrastructure Variables
 # ================================
+#
+# REQUIRED variables must be set in terraform.tfvars
+# OPTIONAL variables have sensible defaults
+#
+
+# =============================================================================
+# REQUIRED - GCP Project
+# =============================================================================
 
 variable "project_id" {
   description = "GCP Project ID"
+  type        = string
+}
+
+# =============================================================================
+# REQUIRED - Google OAuth (for Pomerium + Gitea SSO)
+# =============================================================================
+# Create at: https://console.cloud.google.com/apis/credentials
+# Redirect URI: https://auth.<IP-with-dashes>.nip.io/oauth2/callback
+
+variable "google_oauth_client_id" {
+  description = "Google OAuth Client ID for Pomerium and Gitea SSO"
+  type        = string
+  sensitive   = true
+}
+
+variable "google_oauth_client_secret" {
+  description = "Google OAuth Client Secret"
+  type        = string
+  sensitive   = true
+}
+
+variable "allowed_domain" {
+  description = "Google Workspace domain allowed to access (e.g., company.com)"
   type        = string
 }
 
@@ -108,5 +139,26 @@ variable "admin_ssh_keys" {
   description = "Map of admin usernames to their SSH public keys"
   type        = map(string)
   default     = {}
+  sensitive   = true
+}
+
+variable "meili_master_key" {
+  description = "MeiliSearch master key. Leave empty to auto-generate."
+  type        = string
+  default     = ""
+  sensitive   = true
+}
+
+variable "pomerium_shared_secret" {
+  description = "Pomerium shared secret. Leave empty to auto-generate."
+  type        = string
+  default     = ""
+  sensitive   = true
+}
+
+variable "pomerium_cookie_secret" {
+  description = "Pomerium cookie secret. Leave empty to auto-generate."
+  type        = string
+  default     = ""
   sensitive   = true
 }
